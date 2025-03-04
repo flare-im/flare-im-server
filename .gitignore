@@ -1,0 +1,10 @@
+target
+.vscode
+.idea
+Cargo.lock
+deploy/data/*
+.DS_Store
+.codegpt
+*.log
+deploy/logs
+deploy/data

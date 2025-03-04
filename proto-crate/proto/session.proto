@@ -1,0 +1,176 @@
+syntax = "proto3";
+
+package api.im.session;
+
+option go_package = "github.com/flare/api/im/session;session";
+option java_multiple_files = true;
+option java_package = "api.im.session";
+
+import "common/message.proto";
+import "common/enums.proto";
+
+// 会话服务
+service SessionService {
+  // 注册连接
+  rpc RegisterConnection(RegisterConnectionRequest) returns (RegisterConnectionResponse);
+  // 注销连接
+  rpc UnregisterConnection(UnregisterConnectionRequest) returns (UnregisterConnectionResponse);
+  // 心跳保活
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  // 更新路由表
+  rpc UpdateRouteTable(UpdateRouteTableRequest) returns (UpdateRouteTableResponse);
+  // 获取路由信息
+  rpc GetRouteInfo(GetRouteInfoRequest) returns (GetRouteInfoResponse);
+  // 批量获取路由信息
+  rpc BatchGetRouteInfo(BatchGetRouteInfoRequest) returns (BatchGetRouteInfoResponse);
+  // 获取用户在线状态
+  rpc GetOnlineStatus(GetOnlineStatusRequest) returns (GetOnlineStatusResponse);
+  // 批量获取在线状态
+  rpc BatchGetOnlineStatus(BatchGetOnlineStatusRequest) returns (BatchGetOnlineStatusResponse);
+  // 会话恢复
+  rpc RecoverSession(RecoverSessionRequest) returns (RecoverSessionResponse);
+  // 强制下线
+  rpc ForceOffline(ForceOfflineRequest) returns (ForceOfflineResponse);
+  // 获取会话统计
+  rpc GetSessionStats(GetSessionStatsRequest) returns (GetSessionStatsResponse);
+}
+
+// 连接信息
+message ConnectionInfo {
+  string connection_id = 1;
+  string user_id = 2;
+  string device_id = 3;
+  string gateway_id = 4;
+  api.im.common.Platform platform = 5;
+  string client_version = 6;
+  string client_ip = 7;
+  uint64 connect_time = 8;
+  uint64 last_heartbeat_time = 9;
+  map<string, string> metadata = 10;
+}
+
+// 路由信息
+message RouteInfo {
+  string user_id = 1;
+  repeated ConnectionInfo connections = 2;
+  uint64 update_time = 3;
+}
+
+message RegisterConnectionRequest {
+  string user_id = 1;
+  string device_id = 2;
+  string gateway_id = 3;
+  api.im.common.Platform platform = 4;
+  string client_version = 5;
+  string client_ip = 6;
+  map<string, string> metadata = 7;
+}
+
+message RegisterConnectionResponse {
+  string connection_id = 1;
+  uint64 server_time = 2;
+  map<string, string> config = 3;
+}
+
+message UnregisterConnectionRequest {
+  string connection_id = 1;
+  string user_id = 2;
+  string device_id = 3;
+  string reason = 4;
+}
+
+message UnregisterConnectionResponse {
+  bool success = 1;
+}
+
+message HeartbeatRequest {
+  string connection_id = 1;
+  string user_id = 2;
+  string device_id = 3;
+  uint64 client_time = 4;
+}
+
+message HeartbeatResponse {
+  uint64 server_time = 1;
+}
+
+message UpdateRouteTableRequest {
+  string user_id = 1;
+  repeated ConnectionInfo connections = 2;
+}
+
+message UpdateRouteTableResponse {
+  bool success = 1;
+}
+
+message GetRouteInfoRequest {
+  string user_id = 1;
+}
+
+message GetRouteInfoResponse {
+  RouteInfo route_info = 1;
+}
+
+message BatchGetRouteInfoRequest {
+  repeated string user_ids = 1;
+}
+
+message BatchGetRouteInfoResponse {
+  map<string, RouteInfo> route_infos = 1;
+}
+
+message GetOnlineStatusRequest {
+  string user_id = 1;
+}
+
+message GetOnlineStatusResponse {
+  bool is_online = 1;
+  api.im.common.Platform platform = 2;
+  uint64 last_online_time = 3;
+}
+
+message BatchGetOnlineStatusRequest {
+  repeated string user_ids = 1;
+}
+
+message BatchGetOnlineStatusResponse {
+  map<string, GetOnlineStatusResponse> online_status = 1;
+}
+
+message RecoverSessionRequest {
+  string user_id = 1;
+  string device_id = 2;
+  string old_connection_id = 3;
+  string new_connection_id = 4;
+}
+
+message RecoverSessionResponse {
+  bool success = 1;
+  map<string, string> session_data = 2;
+}
+
+message ForceOfflineRequest {
+  string user_id = 1;
+  repeated string device_ids = 2;
+  string reason = 3;
+  string operator_id = 4;
+}
+
+message ForceOfflineResponse {
+  bool success = 1;
+  repeated string failed_device_ids = 2;
+}
+
+message GetSessionStatsRequest {
+  uint64 start_time = 1;
+  uint64 end_time = 2;
+}
+
+message GetSessionStatsResponse {
+  uint64 total_connections = 1;
+  uint64 active_users = 2;
+  map<string, uint64> platform_stats = 3;
+  map<string, uint64> version_stats = 4;
+  float messages_per_second = 5;
+  float peak_connections = 6;
+} 

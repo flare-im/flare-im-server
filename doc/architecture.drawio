@@ -1,0 +1,291 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.4 Chrome/128.0.6613.186 Electron/32.2.5 Safari/537.36" version="26.0.4">
+  <diagram id="architecture-diagram" name="系统架构图">
+    <mxGraphModel dx="1434" dy="854" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1227" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Flare IM Server Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="400" y="20" width="400" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="logo" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;imageAspect=0;image=data:image/svg+xml,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCAxMCI+PHRleHQgeD0iNSIgeT0iOCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjgiIGZpbGw9IiNGRjZBMDAiPkZsYXJlIElNPC90ZXh0Pjwvc3ZnPg==" parent="1" vertex="1">
+          <mxGeometry x="340" y="20" width="50" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sdk_layer" value="SDK Layer" style="swimlane;whiteSpace=wrap;html=1;fontSize=16;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="40" y="80" width="1080" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="mobile_sdk" value="iOS/Android&#xa;Native SDK" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="sdk_layer" vertex="1">
+          <mxGeometry x="80" y="30" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="web_sdk" value="Web SDK&#xa;(WebSocket/HTTP)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="sdk_layer" vertex="1">
+          <mxGeometry x="240" y="30" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cross_platform_sdk" value="Flutter/RN&#xa;SDK" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="sdk_layer" vertex="1">
+          <mxGeometry x="400" y="30" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lb_layer" value="Load Balancing Layer" style="swimlane;whiteSpace=wrap;html=1;fontSize=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="200" width="1080" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="nginx" value="Nginx&#xa;(API Gateway LB)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" parent="lb_layer" vertex="1">
+          <mxGeometry x="80" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="haproxy" value="HAProxy&#xa;(Message Gateway LB)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" parent="lb_layer" vertex="1">
+          <mxGeometry x="280" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="gateway_layer" value="Gateway Layer" style="swimlane;whiteSpace=wrap;html=1;fontSize=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="320" width="1080" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="api_gateway" value="API Gateway&#xa;(HTTP/REST/gRPC)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;" parent="gateway_layer" vertex="1">
+          <mxGeometry x="80" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_gateway1" value="Message Gateway 1&#xa;(长连接/消息路由)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;" parent="gateway_layer" vertex="1">
+          <mxGeometry x="280" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_gateway2" value="Message Gateway 2&#xa;(长连接/消息路由)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;" parent="gateway_layer" vertex="1">
+          <mxGeometry x="480" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_gateway3" value="Message Gateway N&#xa;(长连接/消息路由)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;" parent="gateway_layer" vertex="1">
+          <mxGeometry x="680" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="service_layer" value="Microservices Layer" style="swimlane;whiteSpace=wrap;html=1;fontSize=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="430" width="1080" height="760" as="geometry" />
+        </mxCell>
+        <mxCell id="auth_service" value="Auth Service&#xa;(认证/授权/Token管理)&#xa;- 用户认证与登录&#xa;- OAuth2授权&#xa;- JWT Token签发与验证&#xa;- 权限管理与访问控制&#xa;- 单点登录(SSO)&#xa;- 安全策略配置" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=10;" parent="service_layer" vertex="1">
+          <mxGeometry x="80" y="40" width="200" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="auth_redis" value="Redis&#xa;(Token缓存)&#xa;- 访问令牌&#xa;- 刷新令牌&#xa;- 会话状态" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=5;" parent="service_layer" vertex="1">
+          <mxGeometry x="110" y="200" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="user_service" value="User Service&#xa;(用户/关系/路由)&#xa;- 用户信息管理&#xa;- 好友关系维护&#xa;- 用户状态同步&#xa;- 用户设置管理&#xa;- 用户数据加密&#xa;- 隐私设置控制&#xa;- 用户行为分析" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=10;" parent="service_layer" vertex="1">
+          <mxGeometry x="320" y="40" width="200" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="user_redis" value="Redis&#xa;(用户信息缓存)&#xa;- 用户基本信息&#xa;- 好友关系&#xa;- 在线状态" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=5;" parent="service_layer" vertex="1">
+          <mxGeometry x="345" y="200" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_router_service" value="Message Router Service&#xa;(消息路由服务)&#xa;- 消息路由和分发&#xa;- 查询路由表&#xa;- 消息转发&#xa;- ACK确认&#xa;- 负载均衡&#xa;- 消息加密传输" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=10;" vertex="1" parent="service_layer">
+          <mxGeometry x="560" y="40" width="210" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_store_service" value="Message Store Service&#xa;(消息存储服务)&#xa;- 消息持久化&#xa;- 写入消息队列&#xa;- 存储到时序库&#xa;- 消息去重&#xa;- 数据压缩&#xa;- 分片存储" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=10;" vertex="1" parent="service_layer">
+          <mxGeometry x="560" y="190" width="210" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_sync_service" value="Message Sync Service&#xa;(消息同步服务)&#xa;- 多端消息同步&#xa;- 序列号管理&#xa;- 状态同步&#xa;- 消息撤回&#xa;- 删除处理&#xa;- 离线消息同步" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=10;" vertex="1" parent="service_layer">
+          <mxGeometry x="820" y="30" width="210" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_filter_service" value="Message Filter Service&#xa;(消息过滤服务)&#xa;- 内容审核&#xa;- 反垃圾处理&#xa;- 敏感词过滤&#xa;- 媒体审核&#xa;- 规则管理&#xa;- 过滤策略配置" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=10;" vertex="1" parent="service_layer">
+          <mxGeometry x="830" y="180" width="210" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_kafka" value="Kafka&#xa;(消息队列)&#xa;- 消息持久化&#xa;- 消息分发&#xa;- 离线消息&#xa;- 消息同步" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=5;" parent="service_layer" vertex="1">
+          <mxGeometry x="640" y="280" width="120" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_redis" value="Redis&#xa;(消息缓存)&#xa;- 最近消息&#xa;- 消息状态&#xa;- 过滤规则" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=5;" vertex="1" parent="service_layer">
+          <mxGeometry x="930" y="310" width="120" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="session_service" value="Session Service&#xa;(会话/连接管理)&#xa;- 连接状态维护&#xa;- 路由表更新&#xa;- 会话保活&#xa;- 心跳检测&#xa;- 断线重连处理&#xa;- 会话恢复机制&#xa;- 多端会话同步&#xa;- 会话负载均衡&#xa;- 异常会话清理&#xa;- 会话监控告警" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=10;" parent="service_layer" vertex="1">
+          <mxGeometry x="630" y="400" width="230" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="session_redis" value="Redis&#xa;(会话状态)&#xa;- 在线状态&#xa;- 路由信息" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=5;" parent="service_layer" vertex="1">
+          <mxGeometry x="690" y="620" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="notification_service" value="Notification Service&#xa;(离线推送/APNS/FCM)&#xa;- 离线消息推送&#xa;- 设备通知管理&#xa;- 推送状态跟踪&#xa;- 多平台推送集成&#xa;- 推送模板管理&#xa;- 推送频率控制&#xa;- 通知分类管理&#xa;- 推送统计分析&#xa;- 自定义推送策略&#xa;- 静默推送处理" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=10;" parent="service_layer" vertex="1">
+          <mxGeometry y="320" width="210" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="notification_kafka" value="Kafka&#xa;(推送队列)&#xa;- 通知队列&#xa;- 状态追踪" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=5;" parent="service_layer" vertex="1">
+          <mxGeometry x="40" y="550" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="media_service" value="Media Service&#xa;(媒体处理/存储)&#xa;- 文件上传下载&#xa;- 媒体转码处理&#xa;- 存储管理&#xa;- 图片压缩优化&#xa;- 视频编码转换&#xa;- 音频处理&#xa;- 文件分片上传&#xa;- CDN加速分发&#xa;- 媒体缓存策略&#xa;- 存储容量管理&#xa;- 文件安全扫描" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=10;" parent="service_layer" vertex="1">
+          <mxGeometry x="220" y="290" width="210" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="media_kafka" value="Kafka&#xa;(媒体处理队列)&#xa;- 转码任务&#xa;- 存储同步" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=5;" parent="service_layer" vertex="1">
+          <mxGeometry x="260" y="500" width="90" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="group_service" value="Group Service&#xa;(群组管理/消息)&#xa;- 群组CRUD&#xa;- 成员管理&#xa;- 群消息处理&#xa;- 群角色权限&#xa;- 群公告管理&#xa;- 群文件共享&#xa;- 群设置控制&#xa;- 群消息同步&#xa;- 群成员限制&#xa;- 群组数据统计&#xa;- 群组搜索服务" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=10;" parent="service_layer" vertex="1">
+          <mxGeometry x="400" y="510" width="210" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="group_redis" value="Redis&#xa;(群组缓存)&#xa;- 群信息&#xa;- 成员列表" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=5;" parent="service_layer" vertex="1">
+          <mxGeometry x="490" y="470" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="search_service" value="Search Service&#xa;(消息/用户搜索)&#xa;- 全文检索&#xa;- 索引管理&#xa;- 搜索优化&#xa;- 实时索引更新&#xa;- 分词处理&#xa;- 搜索权限控制&#xa;- 搜索结果排序&#xa;- 搜索建议&#xa;- 热门搜索统计&#xa;- 多语言搜索&#xa;- 图片OCR搜索" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=10;" parent="service_layer" vertex="1">
+          <mxGeometry x="870" y="455" width="200" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="search_redis" value="Redis&#xa;(搜索缓存)&#xa;- 热门搜索&#xa;- 结果缓存" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=5;" parent="service_layer" vertex="1">
+          <mxGeometry x="950" y="690" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="middleware_layer" value="Middleware Layer" style="swimlane;whiteSpace=wrap;html=1;fontSize=16;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+          <mxGeometry x="40" y="1200" width="1080" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="etcd" value="etcd&#xa;(服务发现/路由表)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;" parent="middleware_layer" vertex="1">
+          <mxGeometry x="80" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="kafka" value="Kafka&#xa;(消息队列/持久化)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;" parent="middleware_layer" vertex="1">
+          <mxGeometry x="280" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="redis" value="Redis Cluster&#xa;(会话/路由缓存)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;" parent="middleware_layer" vertex="1">
+          <mxGeometry x="480" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="monitoring" value="Prometheus/Grafana&#xa;(监控/可视化)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;" parent="middleware_layer" vertex="1">
+          <mxGeometry x="680" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tracing" value="Jaeger&#xa;(链路追踪)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;" parent="middleware_layer" vertex="1">
+          <mxGeometry x="880" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_layer" value="Storage Layer" style="swimlane;whiteSpace=wrap;html=1;fontSize=16;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+          <mxGeometry x="40" y="1330" width="1080" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="postgres" value="PostgreSQL&#xa;(用户/关系数据)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#f8cecc;strokeColor=#b85450;" parent="storage_layer" vertex="1">
+          <mxGeometry x="80" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="timescaledb" value="TimescaleDB&#xa;(消息/会话存储)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#f8cecc;strokeColor=#b85450;" parent="storage_layer" vertex="1">
+          <mxGeometry x="280" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="minio" value="MinIO&#xa;(媒体存储)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#f8cecc;strokeColor=#b85450;" parent="storage_layer" vertex="1">
+          <mxGeometry x="480" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="redis_storage" value="Redis&#xa;(在线状态/路由表)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#f8cecc;strokeColor=#b85450;" parent="storage_layer" vertex="1">
+          <mxGeometry x="680" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="infra_layer" value="Infrastructure Layer" style="swimlane;whiteSpace=wrap;html=1;fontSize=16;" parent="1" vertex="1">
+          <mxGeometry x="40" y="1460" width="1080" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="k8s" value="Kubernetes&#xa;(容器编排)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;" parent="infra_layer" vertex="1">
+          <mxGeometry x="80" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="security" value="Security&#xa;(WAF/DDoS)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;" parent="infra_layer" vertex="1">
+          <mxGeometry x="280" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="logging" value="ELK Stack&#xa;(日志系统)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;" parent="infra_layer" vertex="1">
+          <mxGeometry x="480" y="30" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_title" value="消息流转和长连接管理流程" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry y="1580" width="1080" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="conn_flow_title" value="1. 长连接建立流程" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="40" y="1620" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="client1" value="Client" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="30" y="1710" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="api_gw1" value="API Gateway" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="280" y="1640" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_gw1" value="Message Gateway" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="450" y="1640" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="session1" value="Session Service" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="880" y="1620" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="redis1" value="Redis" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="890" y="1690" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow1" value="1. 获取可用网关" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="client1" target="api_gw1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow2" value="2. 建立WebSocket连接" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="client1" target="msg_gw1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="300" y="1730" />
+              <mxPoint x="450" y="1730" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow3" value="3. 注册连接" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="msg_gw1" target="session1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow4" value="4. 更新路由表" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="session1" target="redis1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_flow_title" value="2. 消息发送流程" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="30" y="1750" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="sender" value="发送方" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="30" y="1801" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_gw_send" value="Message Gateway" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="230" y="1801" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_service_send" value="Message Router Service" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="430" y="1801" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="kafka_send" value="Kafka" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="640" y="1730" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_gw_recv" value="Message Gateway" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="630" y="1801" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="receiver" value="接收方" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="900" y="1801" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_store" value="Message Store Service" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="430" y="1730" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_filter" value="Message Filter Service" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="420" y="1870" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_arrow1" value="1. 发送消息" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="sender" target="msg_gw_send" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_arrow2" value="2. 消息路由" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="msg_gw_send" target="msg_service_send" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_arrow2_1" value="3. 内容过滤" style="endArrow=classic;html=1;fontSize=12;" edge="1" parent="1" source="msg_service_send" target="msg_filter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_arrow2_2" value="4. 消息存储" style="endArrow=classic;html=1;fontSize=12;" edge="1" parent="1" source="msg_service_send" target="msg_store">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_arrow3" value="5. 持久化" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="msg_store" target="kafka_send" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_arrow4" value="6. 查找路由" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="msg_service_send" target="redis1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_arrow5" value="7. 转发消息" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="msg_service_send" target="msg_gw_recv" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_arrow6" value="8. 推送消息" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="msg_gw_recv" target="receiver" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="offline_flow_title" value="3. 离线消息处理" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="40" y="1850" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="kafka2" value="Kafka" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="30" y="1940" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="msg_service2" value="Message Service" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="250" y="1940" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="timescaledb_offline" value="TimescaleDB" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="600" y="1890" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="notification" value="Notification Service" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="480" y="1940" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="offline_client" value="离线客户端" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="710" y="1940" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="offline_arrow1" value="1. 消息消费" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="kafka2" target="msg_service2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="offline_arrow2" value="2. 消息存储" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="msg_service2" target="timescaledb_offline" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="offline_arrow3" value="3. 触发推送" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="msg_service2" target="notification" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="offline_arrow4" value="4. 离线推送" style="endArrow=classic;html=1;fontSize=12;" parent="1" source="notification" target="offline_client" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="reliability_title" value="消息可靠性保证机制" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="90" y="1990" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="reliability_points" value="1. ACK确认机制：消息发送方收到接收方的确认后才认为发送成功&#xa;2. 消息重试机制：未收到ACK的消息会进行指数退避重试&#xa;3. 幂等性处理：通过消息ID去重，确保消息不会重复处理&#xa;4. 持久化保证：消息写入Kafka后再返回发送成功&#xa;5. 分布式事务：采用最终一致性确保消息状态同步" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;fontSize=12;fontColor=#333333;spacing=4;spacingTop=8;spacingLeft=8" parent="1" vertex="1">
+          <mxGeometry x="30" y="2030" width="400" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_title" value="海量历史消息存储方案" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="600" y="1990" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_points" value="1. 分片存储：按时间和会话ID进行分片存储&#xa;2. 冷热分离：热数据保存在TimescaleDB，冷数据迁移到对象存储&#xa;3. 数据压缩：采用高效压缩算法，支持快速检索&#xa;4. 分级存储：&#xa;   - L0：Redis缓存最近消息&#xa;   - L1：TimescaleDB存储活跃消息&#xa;   - L2：对象存储归档历史消息" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;fontSize=12;fontColor=#333333;spacing=4;spacingTop=8;spacingLeft=8" parent="1" vertex="1">
+          <mxGeometry x="500" y="2030" width="400" height="120" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

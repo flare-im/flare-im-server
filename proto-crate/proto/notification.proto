@@ -1,0 +1,201 @@
+syntax = "proto3";
+
+package api.im.notification;
+
+option go_package = "github.com/flare/api/im/notification;notification";
+option java_multiple_files = true;
+option java_package = "api.im.notification";
+
+import "common/message.proto";
+import "common/enums.proto";
+
+// 通知服务
+service NotificationService {
+  // 发送通知
+  rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse);
+  // 批量发送通知
+  rpc BatchSendNotification(BatchSendNotificationRequest) returns (BatchSendNotificationResponse);
+  // 注册设备
+  rpc RegisterDevice(RegisterDeviceRequest) returns (RegisterDeviceResponse);
+  // 注销设备
+  rpc UnregisterDevice(UnregisterDeviceRequest) returns (UnregisterDeviceResponse);
+  // 更新设备令牌
+  rpc UpdateDeviceToken(UpdateDeviceTokenRequest) returns (UpdateDeviceTokenResponse);
+  // 获取通知设置
+  rpc GetNotificationSettings(GetNotificationSettingsRequest) returns (GetNotificationSettingsResponse);
+  // 更新通知设置
+  rpc UpdateNotificationSettings(UpdateNotificationSettingsRequest) returns (UpdateNotificationSettingsResponse);
+  // 获取推送状态
+  rpc GetPushStatus(GetPushStatusRequest) returns (GetPushStatusResponse);
+  // 获取推送统计
+  rpc GetPushStats(GetPushStatsRequest) returns (GetPushStatsResponse);
+}
+
+// 通知类型
+enum NotificationType {
+  UNKNOWN = 0;
+  MESSAGE = 1;
+  FRIEND_REQUEST = 2;
+  GROUP_INVITATION = 3;
+  GROUP_NOTIFICATION = 4;
+  SYSTEM_NOTIFICATION = 5;
+}
+
+// 推送提供商
+enum PushProvider {
+  NONE = 0;
+  APNS = 1;
+  FCM = 2;
+  HMS = 3;
+  XIAOMI = 4;
+  OPPO = 5;
+  VIVO = 6;
+}
+
+// 设备信息
+message DeviceInfo {
+  string device_id = 1;
+  string user_id = 2;
+  api.im.common.Platform platform = 3;
+  PushProvider push_provider = 4;
+  string push_token = 5;
+  string device_model = 6;
+  string system_version = 7;
+  string app_version = 8;
+  string language = 9;
+  uint64 register_time = 10;
+  uint64 last_active_time = 11;
+  map<string, string> metadata = 12;
+}
+
+// 通知设置
+message NotificationSettings {
+  string user_id = 1;
+  bool enable_push = 2;
+  bool enable_preview = 3;
+  bool enable_sound = 4;
+  bool enable_vibrate = 5;
+  repeated NotificationType muted_types = 6;
+  uint64 quiet_start_time = 7;
+  uint64 quiet_end_time = 8;
+  map<string, bool> conversation_settings = 9;
+}
+
+// 推送模板
+message PushTemplate {
+  string title = 1;
+  string body = 2;
+  map<string, string> custom_data = 3;
+  map<string, string> platform_specific = 4;
+}
+
+message SendNotificationRequest {
+  string user_id = 1;
+  repeated string device_ids = 2;
+  NotificationType type = 3;
+  PushTemplate template = 4;
+  api.im.common.MessageData message = 5;
+  uint64 expire_time = 6;
+  map<string, string> extra = 7;
+}
+
+message SendNotificationResponse {
+  string notification_id = 1;
+  repeated string failed_device_ids = 2;
+}
+
+message BatchSendNotificationRequest {
+  repeated string user_ids = 1;
+  NotificationType type = 2;
+  PushTemplate template = 3;
+  api.im.common.MessageData message = 4;
+  uint64 expire_time = 5;
+  map<string, string> extra = 6;
+}
+
+message BatchSendNotificationResponse {
+  repeated string failed_user_ids = 1;
+  map<string, string> notification_ids = 2;
+}
+
+message RegisterDeviceRequest {
+  string user_id = 1;
+  api.im.common.Platform platform = 2;
+  PushProvider push_provider = 3;
+  string push_token = 4;
+  string device_model = 5;
+  string system_version = 6;
+  string app_version = 7;
+  string language = 8;
+  map<string, string> metadata = 9;
+}
+
+message RegisterDeviceResponse {
+  string device_id = 1;
+}
+
+message UnregisterDeviceRequest {
+  string device_id = 1;
+  string user_id = 2;
+}
+
+message UnregisterDeviceResponse {
+  bool success = 1;
+}
+
+message UpdateDeviceTokenRequest {
+  string device_id = 1;
+  string user_id = 2;
+  PushProvider push_provider = 3;
+  string push_token = 4;
+}
+
+message UpdateDeviceTokenResponse {
+  bool success = 1;
+}
+
+message GetNotificationSettingsRequest {
+  string user_id = 1;
+}
+
+message GetNotificationSettingsResponse {
+  NotificationSettings settings = 1;
+}
+
+message UpdateNotificationSettingsRequest {
+  string user_id = 1;
+  NotificationSettings settings = 2;
+}
+
+message UpdateNotificationSettingsResponse {
+  bool success = 1;
+}
+
+message GetPushStatusRequest {
+  string notification_id = 1;
+}
+
+message GetPushStatusResponse {
+  string notification_id = 1;
+  uint64 send_time = 2;
+  uint32 total_devices = 3;
+  uint32 success_devices = 4;
+  uint32 failed_devices = 5;
+  repeated string failed_device_ids = 6;
+  map<string, string> error_details = 7;
+}
+
+message GetPushStatsRequest {
+  uint64 start_time = 1;
+  uint64 end_time = 2;
+}
+
+message GetPushStatsResponse {
+  uint64 total_notifications = 1;
+  uint64 total_devices = 2;
+  float success_rate = 3;
+  map<string, uint64> type_stats = 4;
+  map<string, uint64> provider_stats = 5;
+  map<string, uint64> platform_stats = 6;
+  float average_latency = 7;
+} 

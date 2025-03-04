@@ -1,0 +1,372 @@
+syntax = "proto3";
+
+package api.im.group;
+
+option go_package = "github.com/flare/api/im/group;group";
+option java_multiple_files = true;
+option java_package = "api.im.group";
+
+import "common/message.proto";
+import "common/enums.proto";
+
+// 群组服务
+service GroupService {
+  // 群组管理
+  rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse);
+  rpc UpdateGroup(UpdateGroupRequest) returns (UpdateGroupResponse);
+  rpc DeleteGroup(DeleteGroupRequest) returns (DeleteGroupResponse);
+  rpc GetGroup(GetGroupRequest) returns (GetGroupResponse);
+  rpc BatchGetGroups(BatchGetGroupsRequest) returns (BatchGetGroupsResponse);
+  rpc SearchGroups(SearchGroupsRequest) returns (SearchGroupsResponse);
+  
+  // 成员管理
+  rpc AddMembers(AddMembersRequest) returns (AddMembersResponse);
+  rpc RemoveMembers(RemoveMembersRequest) returns (RemoveMembersResponse);
+  rpc GetMembers(GetMembersRequest) returns (GetMembersResponse);
+  rpc UpdateMemberRole(UpdateMemberRoleRequest) returns (UpdateMemberRoleResponse);
+  rpc GetMemberInfo(GetMemberInfoRequest) returns (GetMemberInfoResponse);
+  rpc BatchGetMemberInfo(BatchGetMemberInfoRequest) returns (BatchGetMemberInfoResponse);
+  
+  // 群设置管理
+  rpc GetGroupSettings(GetGroupSettingsRequest) returns (GetGroupSettingsResponse);
+  rpc UpdateGroupSettings(UpdateGroupSettingsRequest) returns (UpdateGroupSettingsResponse);
+  
+  // 群邀请管理
+  rpc CreateInvitation(CreateInvitationRequest) returns (CreateInvitationResponse);
+  rpc GetInvitations(GetInvitationsRequest) returns (GetInvitationsResponse);
+  rpc HandleInvitation(HandleInvitationRequest) returns (HandleInvitationResponse);
+  
+  // 群公告管理
+  rpc CreateAnnouncement(CreateAnnouncementRequest) returns (CreateAnnouncementResponse);
+  rpc DeleteAnnouncement(DeleteAnnouncementRequest) returns (DeleteAnnouncementResponse);
+  rpc GetAnnouncements(GetAnnouncementsRequest) returns (GetAnnouncementsResponse);
+  
+  // 群文件管理
+  rpc AddGroupFile(AddGroupFileRequest) returns (AddGroupFileResponse);
+  rpc DeleteGroupFile(DeleteGroupFileRequest) returns (DeleteGroupFileResponse);
+  rpc GetGroupFiles(GetGroupFilesRequest) returns (GetGroupFilesResponse);
+}
+
+// 群组信息
+message GroupInfo {
+  string group_id = 1;
+  string name = 2;
+  string avatar_url = 3;
+  string description = 4;
+  string owner_id = 5;
+  api.im.common.GroupType type = 6;
+  uint32 member_count = 7;
+  uint32 max_members = 8;
+  repeated string admins = 9;
+  uint64 create_time = 10;
+  uint64 update_time = 11;
+  map<string, string> extra = 12;
+}
+
+// 群成员信息
+message GroupMember {
+  string group_id = 1;
+  string user_id = 2;
+  string nickname = 3;
+  api.im.common.GroupRole role = 4;
+  uint64 join_time = 5;
+  string inviter_id = 6;
+  map<string, string> extra = 7;
+}
+
+// 群设置
+message GroupSettings {
+  string group_id = 1;
+  bool mute_all = 2;
+  bool admin_add_member = 3;
+  bool member_invite = 4;
+  bool member_modify_name = 5;
+  bool member_modify_avatar = 6;
+  bool show_member_list = 7;
+  api.im.common.JoinType join_type = 8;
+  repeated string muted_members = 9;
+  map<string, bool> feature_flags = 10;
+}
+
+// 群邀请
+message GroupInvitation {
+  string invitation_id = 1;
+  string group_id = 2;
+  string inviter_id = 3;
+  repeated string invitee_ids = 4;
+  string message = 5;
+  api.im.common.InvitationStatus status = 6;
+  uint64 create_time = 7;
+  uint64 expire_time = 8;
+}
+
+// 群公告
+message GroupAnnouncement {
+  string announcement_id = 1;
+  string group_id = 2;
+  string creator_id = 3;
+  string title = 4;
+  string content = 5;
+  bool pinned = 6;
+  uint64 create_time = 7;
+  uint64 update_time = 8;
+}
+
+// 群文件
+message GroupFile {
+  string file_id = 1;
+  string group_id = 2;
+  string uploader_id = 3;
+  string name = 4;
+  string url = 5;
+  string mime_type = 6;
+  int64 size = 7;
+  uint64 upload_time = 8;
+  map<string, string> metadata = 9;
+}
+
+message CreateGroupRequest {
+  string name = 1;
+  string avatar_url = 2;
+  string description = 3;
+  string owner_id = 4;
+  api.im.common.GroupType type = 5;
+  uint32 max_members = 6;
+  repeated string initial_members = 7;
+  map<string, string> extra = 8;
+}
+
+message CreateGroupResponse {
+  GroupInfo group = 1;
+}
+
+message UpdateGroupRequest {
+  string group_id = 1;
+  GroupInfo group = 2;
+  repeated string update_fields = 3;
+  string operator_id = 4;
+}
+
+message UpdateGroupResponse {
+  GroupInfo group = 1;
+}
+
+message DeleteGroupRequest {
+  string group_id = 1;
+  string operator_id = 2;
+}
+
+message DeleteGroupResponse {
+  bool success = 1;
+}
+
+message GetGroupRequest {
+  string group_id = 1;
+}
+
+message GetGroupResponse {
+  GroupInfo group = 1;
+}
+
+message BatchGetGroupsRequest {
+  repeated string group_ids = 1;
+}
+
+message BatchGetGroupsResponse {
+  map<string, GroupInfo> groups = 1;
+}
+
+message SearchGroupsRequest {
+  string keyword = 1;
+  api.im.common.SearchField search_field = 2;
+  int32 offset = 3;
+  int32 limit = 4;
+}
+
+message SearchGroupsResponse {
+  repeated GroupInfo groups = 1;
+  int32 total = 2;
+}
+
+message AddMembersRequest {
+  string group_id = 1;
+  repeated string user_ids = 2;
+  string operator_id = 3;
+}
+
+message AddMembersResponse {
+  repeated string success_user_ids = 1;
+  map<string, string> failed_user_ids = 2;
+}
+
+message RemoveMembersRequest {
+  string group_id = 1;
+  repeated string user_ids = 2;
+  string operator_id = 3;
+  string reason = 4;
+}
+
+message RemoveMembersResponse {
+  repeated string success_user_ids = 1;
+  map<string, string> failed_user_ids = 2;
+}
+
+message GetMembersRequest {
+  string group_id = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+}
+
+message GetMembersResponse {
+  repeated GroupMember members = 1;
+  int32 total = 2;
+}
+
+message UpdateMemberRoleRequest {
+  string group_id = 1;
+  string user_id = 2;
+  api.im.common.GroupRole role = 3;
+  string operator_id = 4;
+}
+
+message UpdateMemberRoleResponse {
+  GroupMember member = 1;
+}
+
+message GetMemberInfoRequest {
+  string group_id = 1;
+  string user_id = 2;
+}
+
+message GetMemberInfoResponse {
+  GroupMember member = 1;
+}
+
+message BatchGetMemberInfoRequest {
+  string group_id = 1;
+  repeated string user_ids = 2;
+}
+
+message BatchGetMemberInfoResponse {
+  map<string, GroupMember> members = 1;
+}
+
+message GetGroupSettingsRequest {
+  string group_id = 1;
+}
+
+message GetGroupSettingsResponse {
+  GroupSettings settings = 1;
+}
+
+message UpdateGroupSettingsRequest {
+  string group_id = 1;
+  GroupSettings settings = 2;
+  string operator_id = 3;
+}
+
+message UpdateGroupSettingsResponse {
+  GroupSettings settings = 1;
+}
+
+message CreateInvitationRequest {
+  string group_id = 1;
+  string inviter_id = 2;
+  repeated string invitee_ids = 3;
+  string message = 4;
+  uint64 expire_time = 5;
+}
+
+message CreateInvitationResponse {
+  GroupInvitation invitation = 1;
+}
+
+message GetInvitationsRequest {
+  string group_id = 1;
+  api.im.common.InvitationStatus status = 2;
+  int32 offset = 3;
+  int32 limit = 4;
+}
+
+message GetInvitationsResponse {
+  repeated GroupInvitation invitations = 1;
+  int32 total = 2;
+}
+
+message HandleInvitationRequest {
+  string invitation_id = 1;
+  string user_id = 2;
+  api.im.common.InvitationStatus action = 3;
+}
+
+message HandleInvitationResponse {
+  GroupInvitation invitation = 1;
+}
+
+message CreateAnnouncementRequest {
+  string group_id = 1;
+  string creator_id = 2;
+  string title = 3;
+  string content = 4;
+  bool pinned = 5;
+}
+
+message CreateAnnouncementResponse {
+  GroupAnnouncement announcement = 1;
+}
+
+message DeleteAnnouncementRequest {
+  string announcement_id = 1;
+  string group_id = 2;
+  string operator_id = 3;
+}
+
+message DeleteAnnouncementResponse {
+  bool success = 1;
+}
+
+message GetAnnouncementsRequest {
+  string group_id = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+}
+
+message GetAnnouncementsResponse {
+  repeated GroupAnnouncement announcements = 1;
+  int32 total = 2;
+}
+
+message AddGroupFileRequest {
+  string group_id = 1;
+  string uploader_id = 2;
+  string name = 3;
+  string url = 4;
+  string mime_type = 5;
+  int64 size = 6;
+  map<string, string> metadata = 7;
+}
+
+message AddGroupFileResponse {
+  GroupFile file = 1;
+}
+
+message DeleteGroupFileRequest {
+  string file_id = 1;
+  string group_id = 2;
+  string operator_id = 3;
+}
+
+message DeleteGroupFileResponse {
+  bool success = 1;
+}
+
+message GetGroupFilesRequest {
+  string group_id = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+}
+
+message GetGroupFilesResponse {
+  repeated GroupFile files = 1;
+  int32 total = 2;
+} 

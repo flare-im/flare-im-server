@@ -1,0 +1,213 @@
+syntax = "proto3";
+
+package api.im.friend;
+
+option go_package = "github.com/flare/api/im/friend;friend";
+option java_multiple_files = true;
+option java_package = "api.im.friend";
+
+import "common/message.proto";
+import "common/enums.proto";
+
+// 好友服务
+service FriendService {
+  // 好友关系管理
+  rpc AddFriend(AddFriendRequest) returns (AddFriendResponse);
+  rpc DeleteFriend(DeleteFriendRequest) returns (DeleteFriendResponse);
+  rpc GetFriends(GetFriendsRequest) returns (GetFriendsResponse);
+  rpc UpdateFriendSettings(UpdateFriendSettingsRequest) returns (UpdateFriendSettingsResponse);
+  rpc GetFriendRequests(GetFriendRequestsRequest) returns (GetFriendRequestsResponse);
+  rpc HandleFriendRequest(HandleFriendRequestRequest) returns (HandleFriendRequestResponse);
+  
+  // 好友分组管理
+  rpc CreateFriendGroup(CreateFriendGroupRequest) returns (CreateFriendGroupResponse);
+  rpc UpdateFriendGroup(UpdateFriendGroupRequest) returns (UpdateFriendGroupResponse);
+  rpc DeleteFriendGroup(DeleteFriendGroupRequest) returns (DeleteFriendGroupResponse);
+  rpc GetFriendGroups(GetFriendGroupsRequest) returns (GetFriendGroupsResponse);
+  rpc MoveFriendToGroup(MoveFriendToGroupRequest) returns (MoveFriendToGroupResponse);
+  
+  // 好友黑名单管理
+  rpc AddToBlacklist(AddToBlacklistRequest) returns (AddToBlacklistResponse);
+  rpc RemoveFromBlacklist(RemoveFromBlacklistRequest) returns (RemoveFromBlacklistResponse);
+  rpc GetBlacklist(GetBlacklistRequest) returns (GetBlacklistResponse);
+}
+
+// 好友关系
+message FriendRelation {
+  string user_id = 1;
+  string friend_id = 2;
+  string remark = 3;
+  repeated string tags = 4;
+  api.im.common.FriendSource source = 5;
+  uint64 create_time = 6;
+  uint64 update_time = 7;
+  map<string, string> settings = 8;
+  string group_id = 9;
+}
+
+// 好友申请
+message FriendRequest {
+  string request_id = 1;
+  string from_user_id = 2;
+  string to_user_id = 3;
+  string message = 4;
+  api.im.common.FriendSource source = 5;
+  api.im.common.FriendRequestStatus status = 6;
+  uint64 create_time = 7;
+  uint64 handle_time = 8;
+}
+
+// 好友分组
+message FriendGroup {
+  string group_id = 1;
+  string user_id = 2;
+  string name = 3;
+  repeated string friend_ids = 4;
+  uint32 sort_order = 5;
+  uint64 create_time = 6;
+  uint64 update_time = 7;
+}
+
+message AddFriendRequest {
+  string user_id = 1;
+  string friend_id = 2;
+  string message = 3;
+  api.im.common.FriendSource source = 4;
+}
+
+message AddFriendResponse {
+  FriendRequest request = 1;
+}
+
+message DeleteFriendRequest {
+  string user_id = 1;
+  string friend_id = 2;
+}
+
+message DeleteFriendResponse {
+  bool success = 1;
+}
+
+message GetFriendsRequest {
+  string user_id = 1;
+  string group_id = 2;
+  int32 offset = 3;
+  int32 limit = 4;
+}
+
+message GetFriendsResponse {
+  repeated FriendRelation friends = 1;
+  int32 total = 2;
+}
+
+message UpdateFriendSettingsRequest {
+  string user_id = 1;
+  string friend_id = 2;
+  string remark = 3;
+  repeated string tags = 4;
+  map<string, string> settings = 5;
+}
+
+message UpdateFriendSettingsResponse {
+  FriendRelation relation = 1;
+}
+
+message GetFriendRequestsRequest {
+  string user_id = 1;
+  api.im.common.FriendRequestStatus status = 2;
+  int32 offset = 3;
+  int32 limit = 4;
+}
+
+message GetFriendRequestsResponse {
+  repeated FriendRequest requests = 1;
+  int32 total = 2;
+}
+
+message HandleFriendRequestRequest {
+  string request_id = 1;
+  string user_id = 2;
+  api.im.common.FriendRequestStatus action = 3;
+}
+
+message HandleFriendRequestResponse {
+  FriendRequest request = 1;
+}
+
+message CreateFriendGroupRequest {
+  string user_id = 1;
+  string name = 2;
+  uint32 sort_order = 3;
+  repeated string friend_ids = 4;
+}
+
+message CreateFriendGroupResponse {
+  FriendGroup group = 1;
+}
+
+message UpdateFriendGroupRequest {
+  string group_id = 1;
+  string user_id = 2;
+  string name = 3;
+  uint32 sort_order = 4;
+}
+
+message UpdateFriendGroupResponse {
+  FriendGroup group = 1;
+}
+
+message DeleteFriendGroupRequest {
+  string group_id = 1;
+  string user_id = 2;
+}
+
+message DeleteFriendGroupResponse {
+  bool success = 1;
+}
+
+message GetFriendGroupsRequest {
+  string user_id = 1;
+}
+
+message GetFriendGroupsResponse {
+  repeated FriendGroup groups = 1;
+}
+
+message MoveFriendToGroupRequest {
+  string user_id = 1;
+  string friend_id = 2;
+  string group_id = 3;
+}
+
+message MoveFriendToGroupResponse {
+  FriendRelation relation = 1;
+}
+
+message AddToBlacklistRequest {
+  string user_id = 1;
+  string blocked_user_id = 2;
+}
+
+message AddToBlacklistResponse {
+  bool success = 1;
+}
+
+message RemoveFromBlacklistRequest {
+  string user_id = 1;
+  string blocked_user_id = 2;
+}
+
+message RemoveFromBlacklistResponse {
+  bool success = 1;
+}
+
+message GetBlacklistRequest {
+  string user_id = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+}
+
+message GetBlacklistResponse {
+  repeated string blocked_user_ids = 1;
+  int32 total = 2;
+} 

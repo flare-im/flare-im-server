@@ -1,0 +1,165 @@
+syntax = "proto3";
+
+package api.im.common;
+
+option go_package = "github.com/flare/api/im/common;common";
+option java_multiple_files = true;
+option java_package = "api.im.common";
+
+//消息数据
+message MessageData{
+    string send_id = 1;
+    string recv_id = 2;
+    bytes content = 3;
+    uint64 send_time = 4;
+    string group_id = 5;
+    int64 client_msg_id = 6;
+    int64 server_msg_id = 7;
+    int32  send_platform_id = 8;
+    string send_nickname = 9;
+    string send_face_url = 10;
+    int32 session_type = 11;
+    int32 msg_from = 12;
+    int32 content_type = 13;
+    int64 seq = 14;
+    uint64 create_time = 15;
+    int32 status = 16;
+    map<string, bool> options = 17;
+    OfflinePushInfo offline_push_info = 18;
+    repeated string at_user_list = 19;
+}
+// 离线推送
+message OfflinePushInfo{
+    string title = 1;
+    string desc = 2;
+    string ios_push_sound = 4;
+    bool ios_badge_count = 5;
+    string signal_info = 6;
+}
+
+// 文字消息
+message TextElem{
+    string content = 1;
+}
+// 名片消息
+message CardElem{
+    string user_id = 1;//用户id
+    string nickname = 2;//用户昵称
+    string face_url = 3;//用户头像
+    string ex = 4;
+}
+// 图片消息
+message PictureElem{
+    string source_path = 1; //图片地址
+    PictureInfo source_picture = 2; //原图
+    PictureInfo snapshot_picture = 3; //缩略图
+}
+// 语音消息
+message SoundElem{
+    string id = 1; //语音id
+    string source_path = 2; //语音地址
+    string url = 3; //语音url
+    int64 duration = 4; //语音时长
+    int64 size = 5; //语音资源大小
+    string type = 6; //语音文件类型
+}
+// 视频消息
+message VideoElem{
+    string id = 1; //视频id
+    string source_path = 2; //视频地址
+    string url = 3; //视频url
+    int64 duration = 4; //视频时长
+    int64 size = 5; //视频资源大小
+    string type = 6; //视频文件类型
+    string snapshot_path = 7; //视频封面地址
+    string snapshot_id = 8; //视频封面id
+    string snapshot_url = 9; //视频封面url
+    int64 snapshot_size = 10; //视频封面资源大小
+    string snapshot_type = 11; //视频封面文件类型
+    int32 snapshot_width = 12; //视频封面宽度
+    int32 snapshot_height = 13; //视频封面高度
+}
+
+// 文件消息
+message FileElem{
+    string id = 1; //文件id
+    string source_path = 2; //文件地址
+    string url = 3; //文件url
+    int64 size = 4; //文件资源大小
+    string type = 5; //文件文件类型
+    string name = 6; //文件名
+}
+// 位置消息
+message LocationElem{
+    double longitude = 1; //经度
+    double latitude = 2; //纬度
+    string description = 3; //描述
+}
+
+// 通知消息
+message NotificationElem{
+    bytes detail = 1; //详细信息
+}
+
+// 自定义消息
+message CustomElem{
+    bytes data = 1; //自定义数据
+    string desc = 2; //描述
+}
+
+// 图片信息
+message PictureInfo{
+    string id = 1; //图片ID
+    string type = 2; //图片类型
+    int32 size = 3; //图片大小
+    int32 width = 4; //图片宽度
+    int32 height = 5; //图片高度
+    string url = 6; //图片URL
+}
+
+
+// 服务端推送消息请求
+message PushMsg {
+	repeated MessageData  mags = 1; //消息
+}
+
+//推送消息返回编码
+enum PushMsgResCode {
+	OK = 0;
+	FAIL = 1;
+	UserOffline = 2;
+}
+// 推送消息返回结果
+message PushMsgResult{
+    string user_id = 1; //用户ID
+    PushMsgResCode code = 2; //返回编码
+    int32 platform_id = 3; //平台
+}
+
+//推送自定义消息
+message PushCustomMsg{
+    repeated string user_id_list = 1; //用户ID列表
+    CustomMsg custom_msg = 2; //自定义消息
+}
+//自定义消息
+message CustomMsg{
+    bytes msg_data = 2; //消息数据
+    int32 msg_type = 3; //消息类型
+}
+
+//推送通知消息
+message PushNotification{
+    repeated string user_id_list = 1; //用户ID列表
+    Notification notification = 2; //通知消息内容
+}
+//通知消息
+message Notification{
+    bytes msg_data = 2; //消息数据
+    int32 msg_type = 3; //消息类型
+}
+// 中转消息结构
+message MsgTransfer {
+    repeated MessageData mags = 1; //发送消息
+    string send_id = 2; // 发送者id
+    string tenant_id = 3; // 租户id
+}

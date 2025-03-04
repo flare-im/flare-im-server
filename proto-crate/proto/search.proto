@@ -1,0 +1,142 @@
+syntax = "proto3";
+
+package api.im.search;
+
+option go_package = "github.com/flare/api/im/search;search";
+option java_multiple_files = true;
+option java_package = "api.im.search";
+
+// 搜索服务
+service SearchService {
+  // 搜索消息
+  rpc SearchMessage(SearchMessageRequest) returns (SearchMessageResponse);
+  // 搜索用户
+  rpc SearchUser(SearchUserRequest) returns (SearchUserResponse);
+  // 搜索群组
+  rpc SearchGroup(SearchGroupRequest) returns (SearchGroupResponse);
+  // 搜索文件
+  rpc SearchFile(SearchFileRequest) returns (SearchFileResponse);
+  // 获取搜索建议
+  rpc GetSearchSuggestions(GetSearchSuggestionsRequest) returns (GetSearchSuggestionsResponse);
+  // 获取热门搜索
+  rpc GetHotSearches(GetHotSearchesRequest) returns (GetHotSearchesResponse);
+}
+
+// 搜索过滤器
+message SearchFilter {
+  string field = 1;
+  FilterOperator operator = 2;
+  string value = 3;
+}
+
+enum FilterOperator {
+  EQUALS = 0;
+  NOT_EQUALS = 1;
+  GREATER_THAN = 2;
+  LESS_THAN = 3;
+  CONTAINS = 4;
+  NOT_CONTAINS = 5;
+  IN = 6;
+  NOT_IN = 7;
+}
+
+enum SearchType {
+  ALL = 0;
+  MESSAGE = 1;
+  USER = 2;
+  GROUP = 3;
+  FILE = 4;
+}
+
+// 搜索结果
+message SearchResult {
+  string id = 1;
+  SearchType type = 2;
+  float score = 3;
+  map<string, string> highlight = 4;
+  map<string, string> data = 5;
+}
+
+message SearchMessageRequest {
+  string keyword = 1;
+  repeated string conversation_ids = 2;
+  int64 start_time = 3;
+  int64 end_time = 4;
+  repeated SearchFilter filters = 5;
+  int32 page = 6;
+  int32 page_size = 7;
+}
+
+message SearchMessageResponse {
+  repeated SearchResult results = 1;
+  int32 total = 2;
+  bool has_more = 3;
+}
+
+message SearchUserRequest {
+  string keyword = 1;
+  repeated SearchFilter filters = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message SearchUserResponse {
+  repeated SearchResult results = 1;
+  int32 total = 2;
+  bool has_more = 3;
+}
+
+message SearchGroupRequest {
+  string keyword = 1;
+  repeated SearchFilter filters = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message SearchGroupResponse {
+  repeated SearchResult results = 1;
+  int32 total = 2;
+  bool has_more = 3;
+}
+
+message SearchFileRequest {
+  string keyword = 1;
+  repeated string file_types = 2;
+  int64 min_size = 3;
+  int64 max_size = 4;
+  repeated SearchFilter filters = 5;
+  int32 page = 6;
+  int32 page_size = 7;
+}
+
+message SearchFileResponse {
+  repeated SearchResult results = 1;
+  int32 total = 2;
+  bool has_more = 3;
+}
+
+message GetSearchSuggestionsRequest {
+  string keyword = 1;
+  SearchType type = 2;
+  int32 limit = 3;
+}
+
+message GetSearchSuggestionsResponse {
+  repeated string suggestions = 1;
+}
+
+message GetHotSearchesRequest {
+  SearchType type = 1;
+  int32 limit = 2;
+}
+
+message GetHotSearchesResponse {
+  repeated HotSearch hot_searches = 1;
+}
+
+message HotSearch {
+  string keyword = 1;
+  int32 count = 2;
+  int32 rank = 3;
+  bool trending = 4;
+}

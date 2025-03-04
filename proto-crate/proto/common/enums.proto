@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package api.im.common;
+
+option go_package = "github.com/flare/api/im/common;common";
+option java_multiple_files = true;
+option java_package = "api.im.common";
+
+//@类型
+enum AtType{
+	None=0;//无
+	AtAll=1;//@所有人
+	AtYou=2;//@你
+	AtUser=3;//@用户
+}
+//会话类型
+enum SessionType{
+	Single=0;//单聊
+	Group=1;//群聊
+	WorkGroup=2;//工作群
+	SuperGroup=3;//超级群
+	System=4;//系统
+}
+//消息类型
+enum ContentType{
+	Text=0;//文本
+	Card=1;//名片
+	Image=2;//图片
+	Voice=3;//语音
+	Video=4;//视频
+	File=5;//文件
+	Location=6;//位置
+	CustomContent=7;//自定义
+	NotificationMsg=8;//通知
+	Tips=9;//提示
+	At=10;//@
+	Reply=11;//回复
+	Quote=12;//引用
+	Merge=13;//合并
+	Forward=14;//转发
+	RedEnvelope=15;//红包
+}
+//消息状态
+enum MsgStatus{
+	Create=0;//无
+	Sending=1;//发送中
+	Sent=2;//已发送
+	Failed=3;//发送失败
+	Read=4;//已读
+	Revoked=5;//已撤回
+}
+//平台类型
+enum Platform{
+	Unknown=0;//未知
+	iOS=1;//iOS
+	Android=2;//安卓
+	Web=3;//网页
+	Windows=4;//Windows
+	MacOS=5;//MacOS
+	Linux=6;//Linux
+	Server=7;//服务器
+}
+//性别类型
+enum Gender{
+	Unspecified=0;//未指定
+	Male=1;//男
+	Female=2;//女
+	Other=3;//其他
+}
+//隐私规则
+enum PrivacyRule{
+	Everyone=0;//所有人
+	Contacts=1;//仅联系人
+	Nobody=2;//任何人都不可以
+	CustomRule=3;//自定义
+}
+//搜索字段
+enum SearchField{
+	All=0;//全部字段
+	Username=1;//用户名
+	Nickname=2;//昵称
+	Phone=3;//手机号
+	Email=4;//邮箱
+	Bio=5;//个人简介
+}
+//好友来源
+enum FriendSource{
+	Search=0;//搜索
+	QRCode=1;//二维码
+	GroupChat=2;//群聊
+	FriendCard=3;//名片
+	PhoneContact=4;//手机通讯录
+	Nearby=5;//附近的人
+	Recommend=6;//推荐
+	OtherSource=7;//其他
+}
+//好友请求状态
+enum FriendRequestStatus{
+	Pending=0;//待处理
+	Accepted=1;//已接受
+	Rejected=2;//已拒绝
+	Ignored=3;//已忽略
+	Expired=4;//已过期
+	Canceled=5;//已取消
+}

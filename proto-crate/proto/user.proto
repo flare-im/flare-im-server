@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package api.im.user;
+
+option go_package = "github.com/flare/api/im/user;user";
+option java_multiple_files = true;
+option java_package = "api.im.user";
+
+import "common/message.proto";
+import "common/enums.proto";
+
+// 用户服务
+service UserService {
+  // 创建用户
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  // 更新用户信息
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  // 获取用户信息
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  // 批量获取用户信息
+  rpc BatchGetUsers(BatchGetUsersRequest) returns (BatchGetUsersResponse);
+  // 删除用户
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+  // 搜索用户
+  rpc SearchUsers(SearchUsersRequest) returns (SearchUsersResponse);
+  
+  // 用户设置管理
+  rpc GetUserSettings(GetUserSettingsRequest) returns (GetUserSettingsResponse);
+  rpc UpdateUserSettings(UpdateUserSettingsRequest) returns (UpdateUserSettingsResponse);
+  rpc GetPrivacySettings(GetPrivacySettingsRequest) returns (GetPrivacySettingsResponse);
+  rpc UpdatePrivacySettings(UpdatePrivacySettingsRequest) returns (UpdatePrivacySettingsResponse);
+}
+
+// 用户信息
+message UserInfo {
+  string user_id = 1;
+  string username = 2;
+  string nickname = 3;
+  string avatar_url = 4;
+  string bio = 5;
+  string phone = 6;
+  string email = 7;
+  string region = 8;
+  string language = 9;
+  api.im.common.Gender gender = 10;
+  uint64 birthday = 11;
+  map<string, string> extra = 12;
+  uint64 create_time = 13;
+  uint64 update_time = 14;
+}
+
+// 用户设置
+message UserSettings {
+  string user_id = 1;
+  bool allow_stranger_message = 2;
+  bool add_friend_verify = 3;
+  bool show_online_status = 4;
+  repeated string blocked_users = 5;
+  map<string, bool> feature_flags = 6;
+}
+
+// 隐私设置
+message PrivacySettings {
+  string user_id = 1;
+  api.im.common.PrivacyRule phone_visibility = 2;
+  api.im.common.PrivacyRule email_visibility = 3;
+  api.im.common.PrivacyRule friend_list_visibility = 4;
+  api.im.common.PrivacyRule moments_visibility = 5;
+  repeated string allowed_users = 6;
+  repeated string blocked_users = 7;
+}
+
+message CreateUserRequest {
+  string username = 1;
+  string nickname = 2;
+  string avatar_url = 3;
+  string phone = 4;
+  string email = 5;
+  string password = 6;
+  api.im.common.Gender gender = 7;
+  map<string, string> extra = 8;
+}
+
+message CreateUserResponse {
+  UserInfo user = 1;
+}
+
+message UpdateUserRequest {
+  string user_id = 1;
+  UserInfo user = 2;
+  repeated string update_fields = 3;
+}
+
+message UpdateUserResponse {
+  UserInfo user = 1;
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserResponse {
+  UserInfo user = 1;
+}
+
+message BatchGetUsersRequest {
+  repeated string user_ids = 1;
+}
+
+message BatchGetUsersResponse {
+  map<string, UserInfo> users = 1;
+}
+
+message DeleteUserRequest {
+  string user_id = 1;
+  string operator_id = 2;
+}
+
+message DeleteUserResponse {
+  bool success = 1;
+}
+
+message SearchUsersRequest {
+  string keyword = 1;
+  api.im.common.SearchField search_field = 2;
+  int32 offset = 3;
+  int32 limit = 4;
+}
+
+message SearchUsersResponse {
+  repeated UserInfo users = 1;
+  int32 total = 2;
+}
+
+message GetUserSettingsRequest {
+  string user_id = 1;
+}
+
+message GetUserSettingsResponse {
+  UserSettings settings = 1;
+}
+
+message UpdateUserSettingsRequest {
+  string user_id = 1;
+  UserSettings settings = 2;
+}
+
+message UpdateUserSettingsResponse {
+  UserSettings settings = 1;
+}
+
+message GetPrivacySettingsRequest {
+  string user_id = 1;
+}
+
+message GetPrivacySettingsResponse {
+  PrivacySettings settings = 1;
+}
+
+message UpdatePrivacySettingsRequest {
+  string user_id = 1;
+  PrivacySettings settings = 2;
+}
+
+message UpdatePrivacySettingsResponse {
+  PrivacySettings settings = 1;
+} 
