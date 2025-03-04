@@ -1,0 +1,66 @@
+env: production
+
+service:
+  name: message-router
+  host: 0.0.0.0
+  port: 50051
+  tags:
+    - grpc
+    - message
+  metadata:
+    version: "1.0.0"
+
+log:
+  output_dir: /var/log/flare
+  file_prefix: message-router
+  level: 2  # INFO
+  max_size: 500
+  max_backups: 90
+  max_age: 90
+  compress: true
+
+consul:
+  host: consul.service.flare
+  port: 8500
+  register_interval: 10
+  heartbeat_interval: 5
+
+redis:
+  host: redis.service.flare
+  port: 6379
+  password: flare123
+  database: 0
+  pool_size: 100
+
+kafka:
+  brokers:
+    - kafka-1.service.flare:9092
+    - kafka-2.service.flare:9092
+    - kafka-3.service.flare:9092
+  group_id: message-router-prod
+  topics:
+    - message.send
+    - message.deliver
+    - message.ack
+
+postgres:
+  host: postgres.service.flare
+  port: 5432
+  database: flare_im
+  username: flare
+  password: flare123
+  pool_size: 100
+
+clickhouse:
+  host: clickhouse.service.flare
+  port: 9000
+  database: flare_im
+  username: flare
+  password: flare123
+  pool_size: 50
+
+extensions:
+  message_queue:
+    max_retry: 5
+    retry_interval: 10
+    batch_size: 1000 

@@ -103,3 +103,20 @@ enum FriendRequestStatus{
 	Expired=4;//已过期
 	Canceled=5;//已取消
 }
+
+
+// 在线状态
+enum OnlineStatus {
+    // 未知状态
+    ONLINE_STATUS_UNKNOWN = 0;
+    // 在线
+    ONLINE_STATUS_ONLINE = 1;
+    // 离线
+    ONLINE_STATUS_OFFLINE = 2;
+    // 忙碌
+    ONLINE_STATUS_BUSY = 3;
+    // 离开
+    ONLINE_STATUS_AWAY = 4;
+    // 隐身
+    ONLINE_STATUS_INVISIBLE = 5;
+}

@@ -1,0 +1,152 @@
+syntax = "proto3";
+
+package api.im.gateway;
+
+import "common/message.proto";
+import "common/enums.proto";
+
+// 消息网关服务
+service MessageGateway {
+    // 推送消息到网关
+    rpc PushMessage (PushMessageRequest) returns (PushMessageResponse);
+    // 批量推送消息到网关
+    rpc BatchPushMessage (BatchPushMessageRequest) returns (BatchPushMessageResponse);
+    // 广播消息
+    rpc BroadcastMessage (BroadcastMessageRequest) returns (BroadcastMessageResponse);
+    // 获取用户在线状态
+    rpc GetUserStatus (GetUserStatusRequest) returns (GetUserStatusResponse);
+}
+
+// 推送消息请求
+message PushMessageRequest {
+    // 消息数据
+    api.im.common.MessageData message = 1;
+    // 接收者ID列表
+    repeated string receiver_ids = 2;
+    // 是否需要持久化
+    bool need_store = 3;
+    // 是否需要离线推送
+    bool need_offline_push = 4;
+    // 推送选项
+    api.im.common.OfflinePushInfo push_info = 5;
+}
+
+// 推送消息响应
+message PushMessageResponse {
+    // 消息ID
+    int64 server_msg_id = 1;
+    // 推送结果
+    map<string, PushResult> push_results = 2;
+    // 状态码 0-成功 其他-失败
+    api.im.common.PushMsgResCode status = 3;
+    // 错误信息
+    string error = 4;
+}
+
+// 批量推送消息请求
+message BatchPushMessageRequest {
+    // 消息列表
+    repeated PushMessageRequest messages = 1;
+}
+
+// 批量推送消息响应
+message BatchPushMessageResponse {
+    // 推送结果列表
+    repeated PushMessageResponse results = 1;
+    // 状态码 0-成功 其他-失败
+    api.im.common.PushMsgResCode status = 2;
+    // 错误信息
+    string error = 3;
+}
+
+// 广播消息请求
+message BroadcastMessageRequest {
+    // 消息数据
+    api.im.common.MessageData message = 1;
+    // 目标类型
+    BroadcastTarget target = 2;
+    // 目标过滤条件
+    map<string, string> filters = 3;
+    // 是否需要持久化
+    bool need_store = 4;
+    // 是否需要离线推送
+    bool need_offline_push = 5;
+    // 推送选项
+    api.im.common.OfflinePushInfo push_info = 6;
+}
+
+// 广播消息响应
+message BroadcastMessageResponse {
+    // 消息ID
+    int64 server_msg_id = 1;
+    // 推送成功的用户数
+    int32 success_count = 2;
+    // 推送失败的用户数
+    int32 failed_count = 3;
+    // 状态码 0-成功 其他-失败
+    api.im.common.PushMsgResCode status = 4;
+    // 错误信息
+    string error = 5;
+}
+
+// 获取用户状态请求
+message GetUserStatusRequest {
+    // 用户ID列表
+    repeated string user_ids = 1;
+}
+
+// 获取用户状态响应
+message GetUserStatusResponse {
+    // 用户状态列表
+    map<string, UserStatus> user_status = 1;
+    // 状态码 0-成功 其他-失败
+    int32 status = 2;
+    // 错误信息
+    string error = 3;
+}
+
+// 推送结果
+message PushResult {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    string error = 2;
+    // 设备列表
+    repeated string device_ids = 3;
+    // 设备状态
+    map<string, api.im.common.Platform> platform_status = 4;
+}
+
+// 用户状态
+message UserStatus {
+    // 是否在线
+    bool online = 1;
+    // 最后在线时间
+    int64 last_online_time = 2;
+    // 设备列表
+    repeated DeviceInfo devices = 3;
+}
+
+// 设备信息
+message DeviceInfo {
+    // 设备ID
+    string device_id = 1;
+    // 设备类型
+    api.im.common.Platform platform = 2;
+    // 在线状态
+    api.im.common.OnlineStatus online_status = 3;
+    // 最后活跃时间
+    int64 last_active_time = 4;
+}
+
+// 广播目标类型
+enum BroadcastTarget {
+    // 所有用户
+    BROADCAST_TARGET_ALL = 0;
+    // 在线用户
+    BROADCAST_TARGET_ONLINE = 1;
+    // 指定标签用户
+    BROADCAST_TARGET_TAG = 2;
+    // 指定设备类型用户
+    BROADCAST_TARGET_DEVICE = 3;
+} 
