@@ -2,23 +2,47 @@
 name = "message-gateway"
 version.workspace = true
 edition.workspace = true
-license.workspace = true
 authors.workspace = true
+description = "Message Gateway Service - Handles client connections and message routing"
+license.workspace = true
 
 [dependencies]
-flare-rpc-core = "0.1.0"
-flare-im-core = "0.1.0"
-tonic.workspace = true
-prost.workspace = true
+# 工作空间依赖
+flare-rpc-core.workspace = true
+flare-im-core.workspace = true
+flare-core.workspace = true
+proto-crate.workspace = true
+common.workspace = true
+
+# 异步运行时
 tokio.workspace = true
+tokio-stream.workspace = true
+
+# 错误处理
+anyhow.workspace = true
+thiserror.workspace = true
+
+# 日志
+log.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
-anyhow.workspace = true
+
+# 序列化
 serde.workspace = true
 serde_json.workspace = true
 
-proto = { path = "../../proto-crate" }
-common = { path = "../../common" }
+# gRPC
+tonic.workspace = true
+prost.workspace = true
+tower.workspace = true
 
-[dependencies.etcd-client]
-workspace = true 
+# 工具
+uuid.workspace = true
+chrono.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+bytes.workspace = true
+dashmap.workspace = true
+once_cell.workspace = true
+async-broadcast.workspace = true
+rand.workspace = true 

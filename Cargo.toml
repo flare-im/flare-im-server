@@ -1,5 +1,8 @@
 [workspace]
 members = [
+    "common",
+    "proto-crate",
+    "gateway/message-gateway",
     "services/message-router",
     "services/message-store",
     "services/message-sync",
@@ -7,53 +10,87 @@ members = [
     "services/media",
     "services/notification",
     "services/search",
-    "services/session",
-    "proto-crate",
-    "common"
+    "services/session"
 ]
+
 resolver = "2"
+
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "Flare IM Server - A distributed instant messaging server"
+repository = "https://github.com/yourusername/flare-im-server"
 license = "MIT"
-authors = ["Flare IM Team"]
 
 [workspace.dependencies]
-tokio = { version = "1.0", features = ["full"] }
+# 核心库
+flare-rpc-core = { path = "../flare/flare-rpc-core" ,default-features = false,features = ["client", "consul"]}
+flare-im-core = { path = "../flare/flare-im-core" ,default-features = false,features = ["server"] }
+flare-core = { path = "../flare/flare-core" }
+
+proto-crate = { path = "proto-crate" }
+common = { path = "common" }
+
+# 异步运行时
+tokio = { version = "1.36", features = ["full"] }
+tokio-stream = "0.1"
+
+# 错误处理
 anyhow = "1.0"
-async-trait = "0.1"
-futures = "0.3"
+thiserror = "2"
+
+# 日志
+log = "0.4"
 tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# 序列化
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9"
-envy = "0.4"
 
-
-# grpc
-prost = "0.13.5"
-tonic= "0.12"
-reqwest = "0.12.12"
-async-broadcast = "0.7"
-dashmap = "6.1"
-etcd-client = "0.14"
-rand = "0.9"
+# gRPC
+tonic = { version = "0.12", features = ["transport", "tls"] }
+prost = "0.13"
 tonic-build = "0.12"
-once_cell = "1.20"
 tower = "0.5"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-#中间件
-kafka = "0.10.0"
-minio = "0.29.0"
-redis = "0.29.0"
 
-#媒体
-aws-sdk-s3 = "1.12"
-aws-config = "1.1"
+# 消息队列
+rdkafka = { version = "0.37", features = ["cmake-build"] }
+
+# 缓存
+redis = { version = "0.29", features = ["tokio-comp"] }
+
+# 对象存储
+aws-sdk-s3 = "1.16"
+aws-config = "1.5"
 aws-types = "1.1"
-bytes = "1.5"
+aws-credential-types = "1.1"
+aws-smithy-runtime = { version = "1.1", features = ["client"] }
+aws-smithy-types = "1.1"
 
-flare-core = "0.1.1"
-flare-im-core= "0.1.0"
-flare-rpc-core = "0.1.0"
+# 搜索引擎
+elasticsearch = "8.5"
+
+# 数据库
+sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "chrono", "json", "uuid"] }
+deadpool-postgres = "0.14"
+tokio-postgres = "0.7"
+
+# 工具
+uuid = { version = "1.7", features = ["v4"] }
+chrono = "0.4"
+async-trait = "0.1"
+futures = "0.3"
+bytes = "1.5"
+dashmap = "6.1"
+once_cell = "1.19"
+async-broadcast = "0.7"
+rand = "0.9"
+
+# HTTP 客户端
+reqwest = { version = "0.11", features = ["json"] }
+
+

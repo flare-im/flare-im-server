@@ -9,6 +9,7 @@ authors.workspace = true
 tonic.workspace = true
 prost.workspace = true
 serde.workspace = true
+tonic-build.workspace = true
 
 [build-dependencies]
 tonic-build.workspace = true
