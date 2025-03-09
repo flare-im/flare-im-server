@@ -1,0 +1,543 @@
+syntax = "proto3";
+
+package api.im.business.friend;
+
+import "common/error.proto";
+
+option go_package = "github.com/flare/api/im/business/friend;friend";
+option java_multiple_files = true;
+option java_package = "api.im.business.friend";
+
+// 好友关系服务
+service FriendService {
+    // 添加好友
+    rpc AddFriend (AddFriendRequest) returns (AddFriendResponse);
+    // 删除好友
+    rpc DeleteFriend (DeleteFriendRequest) returns (DeleteFriendResponse);
+    // 获取好友列表
+    rpc GetFriendList (GetFriendListRequest) returns (GetFriendListResponse);
+    // 获取好友信息
+    rpc GetFriendInfo (GetFriendInfoRequest) returns (GetFriendInfoResponse);
+    // 更新好友信息
+    rpc UpdateFriendInfo (UpdateFriendInfoRequest) returns (UpdateFriendInfoResponse);
+    // 检查好友关系
+    rpc CheckFriendship (CheckFriendshipRequest) returns (CheckFriendshipResponse);
+    // 批量检查好友关系
+    rpc BatchCheckFriendship (BatchCheckFriendshipRequest) returns (BatchCheckFriendshipResponse);
+    // 获取好友申请列表
+    rpc GetFriendRequests (GetFriendRequestsRequest) returns (GetFriendRequestsResponse);
+    // 处理好友申请
+    rpc HandleFriendRequest (HandleFriendRequestRequest) returns (HandleFriendRequestResponse);
+    // 获取好友分组列表
+    rpc GetFriendGroups (GetFriendGroupsRequest) returns (GetFriendGroupsResponse);
+    // 创建好友分组
+    rpc CreateFriendGroup (CreateFriendGroupRequest) returns (CreateFriendGroupResponse);
+    // 删除好友分组
+    rpc DeleteFriendGroup (DeleteFriendGroupRequest) returns (DeleteFriendGroupResponse);
+    // 更新好友分组
+    rpc UpdateFriendGroup (UpdateFriendGroupRequest) returns (UpdateFriendGroupResponse);
+    // 移动好友到分组
+    rpc MoveFriendToGroup (MoveFriendToGroupRequest) returns (MoveFriendToGroupResponse);
+    // 设置好友备注
+    rpc SetFriendRemark (SetFriendRemarkRequest) returns (SetFriendRemarkResponse);
+    // 获取好友统计
+    rpc GetFriendStats (GetFriendStatsRequest) returns (GetFriendStatsResponse);
+    // 获取共同好友
+    rpc GetCommonFriends (GetCommonFriendsRequest) returns (GetCommonFriendsResponse);
+    // 加入黑名单
+    rpc AddToBlacklist (AddToBlacklistRequest) returns (AddToBlacklistResponse);
+    // 移出黑名单
+    rpc RemoveFromBlacklist (RemoveFromBlacklistRequest) returns (RemoveFromBlacklistResponse);
+    // 获取黑名单列表
+    rpc GetBlacklist (GetBlacklistRequest) returns (GetBlacklistResponse);
+}
+
+// 好友信息
+message FriendInfo {
+    // 用户ID
+    string user_id = 1;
+    // 好友ID
+    string friend_id = 2;
+    // 好友备注
+    string remark = 3;
+    // 分组ID
+    string group_id = 4;
+    // 好友来源
+    FriendSource source = 5;
+    // 好友状态
+    FriendStatus status = 6;
+    // 扩展信息
+    map<string, string> extra = 7;
+    // 创建时间
+    int64 create_time = 8;
+    // 更新时间
+    int64 update_time = 9;
+}
+
+// 好友来源
+enum FriendSource {
+    // 搜索添加
+    SEARCH = 0;
+    // 群聊添加
+    GROUP = 1;
+    // 名片分享
+    CARD = 2;
+    // 扫码添加
+    QR_CODE = 3;
+    // 手机号添加
+    PHONE = 4;
+    // 邮箱添加
+    EMAIL = 5;
+    // 其他方式
+    OTHER = 6;
+}
+
+// 好友状态
+enum FriendStatus {
+    // 正常
+    NORMAL = 0;
+    // 特别关注
+    SPECIAL = 1;
+    // 已删除
+    DELETED = 2;
+    // 已拉黑
+    BLOCKED = 3;
+}
+
+// 好友分组信息
+message FriendGroupInfo {
+    // 分组ID
+    string group_id = 1;
+    // 用户ID
+    string user_id = 2;
+    // 分组名称
+    string name = 3;
+    // 分组排序
+    int32 sort = 4;
+    // 好友数量
+    int32 friend_count = 5;
+    // 创建时间
+    int64 create_time = 6;
+    // 更新时间
+    int64 update_time = 7;
+}
+
+// 好友申请信息
+message FriendRequestInfo {
+    // 申请ID
+    string request_id = 1;
+    // 发送者ID
+    string from_user_id = 2;
+    // 接收者ID
+    string to_user_id = 3;
+    // 申请说明
+    string message = 4;
+    // 申请来源
+    FriendSource source = 5;
+    // 申请状态
+    RequestStatus status = 6;
+    // 创建时间
+    int64 create_time = 7;
+    // 处理时间
+    int64 handle_time = 8;
+    // 处理说明
+    string handle_message = 9;
+}
+
+// 申请状态
+enum RequestStatus {
+    // 待处理
+    PENDING = 0;
+    // 已接受
+    ACCEPTED = 1;
+    // 已拒绝
+    REJECTED = 2;
+    // 已过期
+    EXPIRED = 3;
+}
+
+// 添加好友请求
+message AddFriendRequest {
+    // 用户ID
+    string user_id = 1;
+    // 目标好友ID
+    string friend_id = 2;
+    // 申请说明
+    string message = 3;
+    // 好友来源
+    FriendSource source = 4;
+    // 分组ID
+    string group_id = 5;
+}
+
+// 添加好友响应
+message AddFriendResponse {
+    // 申请信息
+    FriendRequestInfo request = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 删除好友请求
+message DeleteFriendRequest {
+    // 用户ID
+    string user_id = 1;
+    // 好友ID
+    string friend_id = 2;
+}
+
+// 删除好友响应
+message DeleteFriendResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取好友列表请求
+message GetFriendListRequest {
+    // 用户ID
+    string user_id = 1;
+    // 分组ID
+    string group_id = 2;
+    // 分页大小
+    int32 page_size = 3;
+    // 分页标记
+    string page_token = 4;
+}
+
+// 获取好友列表响应
+message GetFriendListResponse {
+    // 好友列表
+    repeated FriendInfo friends = 1;
+    // 下一页标记
+    string next_page_token = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 获取好友信息请求
+message GetFriendInfoRequest {
+    // 用户ID
+    string user_id = 1;
+    // 好友ID
+    string friend_id = 2;
+}
+
+// 获取好友信息响应
+message GetFriendInfoResponse {
+    // 好友信息
+    FriendInfo friend = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 更新好友信息请求
+message UpdateFriendInfoRequest {
+    // 用户ID
+    string user_id = 1;
+    // 好友ID
+    string friend_id = 2;
+    // 更新字段
+    map<string, string> updates = 3;
+}
+
+// 更新好友信息响应
+message UpdateFriendInfoResponse {
+    // 好友信息
+    FriendInfo friend = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 检查好友关系请求
+message CheckFriendshipRequest {
+    // 用户ID
+    string user_id = 1;
+    // 好友ID
+    string friend_id = 2;
+}
+
+// 检查好友关系响应
+message CheckFriendshipResponse {
+    // 是否为好友
+    bool is_friend = 1;
+    // 好友状态
+    FriendStatus status = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 批量检查好友关系请求
+message BatchCheckFriendshipRequest {
+    // 用户ID
+    string user_id = 1;
+    // 好友ID列表
+    repeated string friend_ids = 2;
+}
+
+// 批量检查好友关系响应
+message BatchCheckFriendshipResponse {
+    // 好友关系映射
+    map<string, FriendshipCheckResult> results = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 好友关系检查结果
+message FriendshipCheckResult {
+    // 是否为好友
+    bool is_friend = 1;
+    // 好友状态
+    FriendStatus status = 2;
+}
+
+// 获取好友申请列表请求
+message GetFriendRequestsRequest {
+    // 用户ID
+    string user_id = 1;
+    // 申请状态
+    RequestStatus status = 2;
+    // 分页大小
+    int32 page_size = 3;
+    // 分页标记
+    string page_token = 4;
+}
+
+// 获取好友申请列表响应
+message GetFriendRequestsResponse {
+    // 申请列表
+    repeated FriendRequestInfo requests = 1;
+    // 下一页标记
+    string next_page_token = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 处理好友申请请求
+message HandleFriendRequestRequest {
+    // 申请ID
+    string request_id = 1;
+    // 是否同意
+    bool approved = 2;
+    // 处理说明
+    string message = 3;
+    // 分组ID
+    string group_id = 4;
+}
+
+// 处理好友申请响应
+message HandleFriendRequestResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取好友分组列表请求
+message GetFriendGroupsRequest {
+    // 用户ID
+    string user_id = 1;
+}
+
+// 获取好友分组列表响应
+message GetFriendGroupsResponse {
+    // 分组列表
+    repeated FriendGroupInfo groups = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 创建好友分组请求
+message CreateFriendGroupRequest {
+    // 用户ID
+    string user_id = 1;
+    // 分组名称
+    string name = 2;
+    // 分组排序
+    int32 sort = 3;
+    // 好友ID列表
+    repeated string friend_ids = 4;
+}
+
+// 创建好友分组响应
+message CreateFriendGroupResponse {
+    // 分组信息
+    FriendGroupInfo group = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 删除好友分组请求
+message DeleteFriendGroupRequest {
+    // 用户ID
+    string user_id = 1;
+    // 分组ID
+    string group_id = 2;
+}
+
+// 删除好友分组响应
+message DeleteFriendGroupResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 更新好友分组请求
+message UpdateFriendGroupRequest {
+    // 用户ID
+    string user_id = 1;
+    // 分组ID
+    string group_id = 2;
+    // 更新字段
+    map<string, string> updates = 3;
+}
+
+// 更新好友分组响应
+message UpdateFriendGroupResponse {
+    // 分组信息
+    FriendGroupInfo group = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 移动好友到分组请求
+message MoveFriendToGroupRequest {
+    // 用户ID
+    string user_id = 1;
+    // 好友ID列表
+    repeated string friend_ids = 2;
+    // 目标分组ID
+    string target_group_id = 3;
+}
+
+// 移动好友到分组响应
+message MoveFriendToGroupResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 设置好友备注请求
+message SetFriendRemarkRequest {
+    // 用户ID
+    string user_id = 1;
+    // 好友ID
+    string friend_id = 2;
+    // 备注名
+    string remark = 3;
+}
+
+// 设置好友备注响应
+message SetFriendRemarkResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取好友统计请求
+message GetFriendStatsRequest {
+    // 用户ID
+    string user_id = 1;
+}
+
+// 获取好友统计响应
+message GetFriendStatsResponse {
+    // 统计信息
+    FriendStats stats = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 好友统计信息
+message FriendStats {
+    // 好友总数
+    int32 total_friends = 1;
+    // 特别关注数
+    int32 special_friends = 2;
+    // 分组数量
+    int32 group_count = 3;
+    // 待处理申请数
+    int32 pending_requests = 4;
+    // 黑名单数量
+    int32 blacklist_count = 5;
+    // 详细统计数据
+    map<string, int64> details = 6;
+}
+
+// 获取共同好友请求
+message GetCommonFriendsRequest {
+    // 用户ID
+    string user_id = 1;
+    // 目标用户ID
+    string target_user_id = 2;
+    // 分页大小
+    int32 page_size = 3;
+    // 分页标记
+    string page_token = 4;
+}
+
+// 获取共同好友响应
+message GetCommonFriendsResponse {
+    // 共同好友列表
+    repeated FriendInfo friends = 1;
+    // 下一页标记
+    string next_page_token = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 加入黑名单请求
+message AddToBlacklistRequest {
+    // 用户ID
+    string user_id = 1;
+    // 目标用户ID
+    string target_user_id = 2;
+}
+
+// 加入黑名单响应
+message AddToBlacklistResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 移出黑名单请求
+message RemoveFromBlacklistRequest {
+    // 用户ID
+    string user_id = 1;
+    // 目标用户ID
+    string target_user_id = 2;
+}
+
+// 移出黑名单响应
+message RemoveFromBlacklistResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取黑名单列表请求
+message GetBlacklistRequest {
+    // 用户ID
+    string user_id = 1;
+    // 分页大小
+    int32 page_size = 2;
+    // 分页标记
+    string page_token = 3;
+}
+
+// 获取黑名单列表响应
+message GetBlacklistResponse {
+    // 黑名单用户列表
+    repeated string blacklisted_user_ids = 1;
+    // 下一页标记
+    string next_page_token = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+} 

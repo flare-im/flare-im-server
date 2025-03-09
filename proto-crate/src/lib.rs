@@ -4,32 +4,56 @@ pub mod api {
             tonic::include_proto!("api.im.common");
         }
         
-        pub mod message {
-            tonic::include_proto!("api.im.message");
+        pub mod gateway {
+            tonic::include_proto!("api.im.gateway");
         }
-        
-        pub mod session {
-            tonic::include_proto!("api.im.session");
+
+        pub mod service {
+            pub mod store {
+                tonic::include_proto!("api.im.service.store");
+            }
+            
+            pub mod filter {
+                tonic::include_proto!("api.im.service.filter");
+            }
+
+            pub mod router {
+                tonic::include_proto!("api.im.service.router");
+            }
+
+            pub mod session {
+                tonic::include_proto!("api.im.service.session");
+            }
+
+            pub mod sync {
+                tonic::include_proto!("api.im.service.sync");
+            }
+
+            pub mod notification {
+                tonic::include_proto!("api.im.service.notification");
+            }
         }
-        
-        pub mod notification {
-            tonic::include_proto!("api.im.notification");
-        }
-        
-        pub mod media {
-            tonic::include_proto!("api.im.media");
-        }
-        
-        pub mod search {
-            tonic::include_proto!("api.im.search");
-        }
-        
-        pub mod user {
-            tonic::include_proto!("api.im.user");
-        }
-        
-        pub mod friend {
-            tonic::include_proto!("api.im.friend");
+
+        pub mod business {
+            pub mod user {
+                tonic::include_proto!("api.im.business.user");
+            }
+            
+            pub mod group {
+                tonic::include_proto!("api.im.business.group");
+            }
+            
+            pub mod friend {
+                tonic::include_proto!("api.im.business.friend");
+            }
+            
+            pub mod media {
+                tonic::include_proto!("api.im.business.media");
+            }
+            
+            pub mod search {
+                tonic::include_proto!("api.im.business.search");
+            }
         }
     }
 } 

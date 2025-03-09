@@ -1,0 +1,31 @@
+[package]
+name = "message-sync"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description = "Message sync"
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+async-trait.workspace = true
+chrono.workspace = true
+flare-core = { path = "../../../../flare/flare-core" }
+flare-rpc-core = { path = "../../../../flare/flare-rpc-core" }
+proto-crate = { path = "../../../proto-crate" }
+futures.workspace = true
+log.workspace = true
+mockall.workspace = true
+
+rdkafka.workspace = true
+redis = { workspace = true, features = ["tokio-comp", "connection-manager", "cluster"] }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["full"] }
+tonic.workspace = true
+uuid = { workspace = true, features = ["serde", "v4"] }
+
+[dev-dependencies]
+tokio-test.workspace = true
+redis-test.workspace = true 

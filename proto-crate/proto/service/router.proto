@@ -1,0 +1,164 @@
+syntax = "proto3";
+
+package api.im.service.router;
+
+import "common/message.proto";
+import "common/error.proto";
+
+option go_package = "github.com/flare/api/im/service.router;router";
+option java_multiple_files = true;
+option java_package = "api.im.service.router";
+
+// 消息路由服务
+service MessageRouter {
+    // 上行消息路由
+    rpc RouteUpstreamMessage (RouteUpstreamRequest) returns (RouteUpstreamResponse);
+    // 下行消息分发
+    rpc DistributeMessage (DistributeMessageRequest) returns (DistributeMessageResponse);
+    // 消息过滤
+    rpc FilterMessage (FilterMessageRequest) returns (FilterMessageResponse);
+    // 消息优先级处理
+    rpc HandleMessagePriority (HandleMessagePriorityRequest) returns (HandleMessagePriorityResponse);
+    // 获取消息路由信息
+    rpc GetMessageRoute (GetMessageRouteRequest) returns (GetMessageRouteResponse);
+}
+
+// 上行消息路由请求
+message RouteUpstreamRequest {
+    // 消息数据
+    api.im.common.MessageData message = 1;
+    // 源网关ID
+    string source_gateway_id = 2;
+    // 路由选项
+    MessageRoutingOptions options = 3;
+}
+
+// 上行消息路由响应
+message RouteUpstreamResponse {
+    // 消息ID
+    string message_id = 1;
+    // 路由结果
+    bool success = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 下行消息分发请求
+message DistributeMessageRequest {
+    // 消息数据
+    api.im.common.MessageData message = 1;
+    // 目标网关列表
+    repeated string target_gateway_ids = 2;
+    // 分发选项
+    MessageDistributionOptions options = 3;
+}
+
+// 下行消息分发响应
+message DistributeMessageResponse {
+    // 分发结果
+    map<string, bool> distribution_results = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 消息过滤请求
+message FilterMessageRequest {
+    // 消息数据
+    api.im.common.MessageData message = 1;
+    // 过滤规则
+    repeated string filter_rules = 2;
+}
+
+// 消息过滤响应
+message FilterMessageResponse {
+    // 是否通过过滤
+    bool passed = 1;
+    // 过滤结果
+    map<string, bool> filter_results = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 消息优先级处理请求
+message HandleMessagePriorityRequest {
+    // 消息数据
+    api.im.common.MessageData message = 1;
+    // 优先级规则
+    PriorityRules priority_rules = 2;
+}
+
+// 消息优先级处理响应
+message HandleMessagePriorityResponse {
+    // 处理后的优先级
+    int32 priority = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取消息路由请求
+message GetMessageRouteRequest {
+    // 用户ID
+    string user_id = 1;
+    // 设备ID列表
+    repeated string device_ids = 2;
+}
+
+// 获取消息路由响应
+message GetMessageRouteResponse {
+    // 路由信息
+    repeated RouteInfo routes = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 消息路由选项
+message MessageRoutingOptions {
+    // 优先级
+    int32 priority = 1;
+    // 是否需要存储
+    bool need_store = 2;
+    // 是否需要过滤
+    bool need_filter = 3;
+    // 超时时间（毫秒）
+    int32 timeout_ms = 4;
+    // 扩展选项
+    map<string, string> extra_options = 5;
+}
+
+// 消息分发选项
+message MessageDistributionOptions {
+    // 是否需要确认
+    bool need_ack = 1;
+    // 重试次数
+    int32 retry_count = 2;
+    // 重试间隔（毫秒）
+    int32 retry_interval_ms = 3;
+    // 是否允许离线推送
+    bool allow_offline_push = 4;
+    // 扩展选项
+    map<string, string> extra_options = 5;
+}
+
+// 优先级规则
+message PriorityRules {
+    // 用户优先级
+    map<string, int32> user_priorities = 1;
+    // 会话优先级
+    map<string, int32> session_priorities = 2;
+    // 消息类型优先级
+    map<int32, int32> message_type_priorities = 3;
+}
+
+// 路由信息
+message RouteInfo {
+    // 网关ID
+    string gateway_id = 1;
+    // 用户ID
+    string user_id = 2;
+    // 设备ID
+    string device_id = 3;
+    // 设备类型
+    string platform = 4;
+    // 路由权重
+    int32 weight = 5;
+} 

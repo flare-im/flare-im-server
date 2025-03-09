@@ -1,0 +1,451 @@
+syntax = "proto3";
+
+package api.im.business.media;
+
+import "common/error.proto";
+
+option go_package = "github.com/flare/api/im/business/media;media";
+option java_multiple_files = true;
+option java_package = "api.im.business.media";
+
+// 媒体服务
+service MediaService {
+    // 上传文件
+    rpc UploadFile (UploadFileRequest) returns (UploadFileResponse);
+    // 下载文件
+    rpc DownloadFile (DownloadFileRequest) returns (DownloadFileResponse);
+    // 获取上传URL
+    rpc GetUploadUrl (GetUploadUrlRequest) returns (GetUploadUrlResponse);
+    // 获取下载URL
+    rpc GetDownloadUrl (GetDownloadUrlRequest) returns (GetDownloadUrlResponse);
+    // 获取文件信息
+    rpc GetFileInfo (GetFileInfoRequest) returns (GetFileInfoResponse);
+    // 删除文件
+    rpc DeleteFile (DeleteFileRequest) returns (DeleteFileResponse);
+    // 批量获取文件信息
+    rpc BatchGetFileInfo (BatchGetFileInfoRequest) returns (BatchGetFileInfoResponse);
+    // 批量删除文件
+    rpc BatchDeleteFile (BatchDeleteFileRequest) returns (BatchDeleteFileResponse);
+    // 图片处理
+    rpc ProcessImage (ProcessImageRequest) returns (ProcessImageResponse);
+    // 音频处理
+    rpc ProcessAudio (ProcessAudioRequest) returns (ProcessAudioResponse);
+    // 视频处理
+    rpc ProcessVideo (ProcessVideoRequest) returns (ProcessVideoResponse);
+    // 获取文件预览
+    rpc GetFilePreview (GetFilePreviewRequest) returns (GetFilePreviewResponse);
+    // 获取文件统计
+    rpc GetFileStats (GetFileStatsRequest) returns (GetFileStatsResponse);
+}
+
+// 文件信息
+message FileInfo {
+    // 文件ID
+    string file_id = 1;
+    // 文件名
+    string name = 2;
+    // 文件类型
+    FileType type = 3;
+    // 文件大小（字节）
+    int64 size = 4;
+    // 文件哈希
+    string hash = 5;
+    // MIME类型
+    string mime_type = 6;
+    // 存储位置
+    string storage_location = 7;
+    // 访问URL
+    string access_url = 8;
+    // 上传者ID
+    string uploader_id = 9;
+    // 元数据
+    map<string, string> metadata = 10;
+    // 创建时间
+    int64 create_time = 11;
+    // 过期时间
+    int64 expire_time = 12;
+    // 处理状态
+    ProcessStatus process_status = 13;
+    // 处理结果
+    map<string, string> process_result = 14;
+}
+
+// 文件类型
+enum FileType {
+    // 图片
+    FILE_TYPE_IMAGE = 0;
+    // 音频
+    FILE_TYPE_AUDIO = 1;
+    // 视频
+    FILE_TYPE_VIDEO = 2;
+    // 文档
+    FILE_TYPE_DOCUMENT = 3;
+    // 其他
+    FILE_TYPE_OTHER = 4;
+}
+
+// 处理状态
+enum ProcessStatus {
+    // 待处理
+    PENDING = 0;
+    // 处理中
+    PROCESSING = 1;
+    // 处理成功
+    SUCCESS = 2;
+    // 处理失败
+    FAILED = 3;
+}
+
+// 上传文件请求
+message UploadFileRequest {
+    // 文件数据
+    bytes data = 1;
+    // 文件名
+    string name = 2;
+    // 文件类型
+    FileType type = 3;
+    // 上传者ID
+    string uploader_id = 4;
+    // 元数据
+    map<string, string> metadata = 5;
+    // 处理选项
+    map<string, string> process_options = 6;
+}
+
+// 上传文件响应
+message UploadFileResponse {
+    // 文件信息
+    FileInfo file = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 下载文件请求
+message DownloadFileRequest {
+    // 文件ID
+    string file_id = 1;
+    // 下载选项
+    map<string, string> options = 2;
+}
+
+// 下载文件响应
+message DownloadFileResponse {
+    // 文件数据
+    bytes data = 1;
+    // 文件信息
+    FileInfo file = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 获取上传URL请求
+message GetUploadUrlRequest {
+    // 文件名
+    string name = 1;
+    // 文件类型
+    FileType type = 2;
+    // 文件大小
+    int64 size = 3;
+    // 上传者ID
+    string uploader_id = 4;
+    // 元数据
+    map<string, string> metadata = 5;
+    // URL有效期（秒）
+    int32 expires_in = 6;
+}
+
+// 获取上传URL响应
+message GetUploadUrlResponse {
+    // 上传URL
+    string upload_url = 1;
+    // 文件ID
+    string file_id = 2;
+    // 上传凭证
+    string upload_token = 3;
+    // 错误信息
+    api.im.common.Error error = 4;
+}
+
+// 获取下载URL请求
+message GetDownloadUrlRequest {
+    // 文件ID
+    string file_id = 1;
+    // 下载选项
+    map<string, string> options = 2;
+    // URL有效期（秒）
+    int32 expires_in = 3;
+}
+
+// 获取下载URL响应
+message GetDownloadUrlResponse {
+    // 下载URL
+    string download_url = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取文件信息请求
+message GetFileInfoRequest {
+    // 文件ID
+    string file_id = 1;
+}
+
+// 获取文件信息响应
+message GetFileInfoResponse {
+    // 文件信息
+    FileInfo file = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 删除文件请求
+message DeleteFileRequest {
+    // 文件ID
+    string file_id = 1;
+}
+
+// 删除文件响应
+message DeleteFileResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 批量获取文件信息请求
+message BatchGetFileInfoRequest {
+    // 文件ID列表
+    repeated string file_ids = 1;
+}
+
+// 批量获取文件信息响应
+message BatchGetFileInfoResponse {
+    // 文件信息映射
+    map<string, FileInfo> files = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 批量删除文件请求
+message BatchDeleteFileRequest {
+    // 文件ID列表
+    repeated string file_ids = 1;
+}
+
+// 批量删除文件响应
+message BatchDeleteFileResponse {
+    // 删除结果映射
+    map<string, bool> results = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 图片处理请求
+message ProcessImageRequest {
+    // 文件ID
+    string file_id = 1;
+    // 处理操作
+    repeated ImageOperation operations = 2;
+    // 输出格式
+    string output_format = 3;
+    // 处理选项
+    map<string, string> options = 4;
+}
+
+// 图片处理响应
+message ProcessImageResponse {
+    // 处理后的文件信息
+    FileInfo processed_file = 1;
+    // 处理结果
+    map<string, string> results = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 图片处理操作
+message ImageOperation {
+    // 操作类型
+    ImageOperationType type = 1;
+    // 操作参数
+    map<string, string> params = 2;
+}
+
+// 图片处理操作类型
+enum ImageOperationType {
+    // 调整大小
+    IMAGE_RESIZE = 0;
+    // 裁剪
+    IMAGE_CROP = 1;
+    // 旋转
+    IMAGE_ROTATE = 2;
+    // 水印
+    IMAGE_WATERMARK = 3;
+    // 格式转换
+    IMAGE_FORMAT = 4;
+    // 压缩
+    IMAGE_COMPRESS = 5;
+}
+
+// 音频处理请求
+message ProcessAudioRequest {
+    // 文件ID
+    string file_id = 1;
+    // 处理操作
+    repeated AudioOperation operations = 2;
+    // 输出格式
+    string output_format = 3;
+    // 处理选项
+    map<string, string> options = 4;
+}
+
+// 音频处理响应
+message ProcessAudioResponse {
+    // 处理后的文件信息
+    FileInfo processed_file = 1;
+    // 处理结果
+    map<string, string> results = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 音频处理操作
+message AudioOperation {
+    // 操作类型
+    AudioOperationType type = 1;
+    // 操作参数
+    map<string, string> params = 2;
+}
+
+// 音频处理操作类型
+enum AudioOperationType {
+    // 转码
+    AUDIO_TRANSCODE = 0;
+    // 提取音频
+    AUDIO_EXTRACT = 1;
+    // 音频剪辑
+    AUDIO_CLIP = 2;
+    // 音频合并
+    AUDIO_MERGE = 3;
+    // 音频效果
+    AUDIO_EFFECT = 4;
+}
+
+// 视频处理请求
+message ProcessVideoRequest {
+    // 文件ID
+    string file_id = 1;
+    // 处理操作
+    repeated VideoOperation operations = 2;
+    // 输出格式
+    string output_format = 3;
+    // 处理选项
+    map<string, string> options = 4;
+}
+
+// 视频处理响应
+message ProcessVideoResponse {
+    // 处理后的文件信息
+    FileInfo processed_file = 1;
+    // 处理结果
+    map<string, string> results = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 视频处理操作
+message VideoOperation {
+    // 操作类型
+    VideoOperationType type = 1;
+    // 操作参数
+    map<string, string> params = 2;
+}
+
+// 视频处理操作类型
+enum VideoOperationType {
+    // 转码
+    VIDEO_TRANSCODE = 0;
+    // 截图
+    VIDEO_SNAPSHOT = 1;
+    // 视频剪辑
+    VIDEO_CLIP = 2;
+    // 视频合并
+    VIDEO_MERGE = 3;
+    // 水印
+    VIDEO_WATERMARK = 4;
+}
+
+// 获取文件预览请求
+message GetFilePreviewRequest {
+    // 文件ID
+    string file_id = 1;
+    // 预览类型
+    PreviewType type = 2;
+    // 预览选项
+    map<string, string> options = 3;
+}
+
+// 获取文件预览响应
+message GetFilePreviewResponse {
+    // 预览URL
+    string preview_url = 1;
+    // 预览内容
+    bytes preview_data = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 预览类型
+enum PreviewType {
+    // 缩略图
+    THUMBNAIL = 0;
+    // 在线预览
+    ONLINE = 1;
+    // HTML预览
+    HTML = 2;
+}
+
+// 获取文件统计请求
+message GetFileStatsRequest {
+    // 开始时间
+    int64 start_time = 1;
+    // 结束时间
+    int64 end_time = 2;
+    // 统计维度
+    repeated FileStatsDimension dimensions = 3;
+}
+
+// 获取文件统计响应
+message GetFileStatsResponse {
+    // 统计信息
+    FileStats stats = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 文件统计维度
+enum FileStatsDimension {
+    // 文件类型维度
+    FILE_TYPE = 0;
+    // 上传者维度
+    UPLOADER = 1;
+    // 时间维度
+    TIME = 2;
+    // 存储位置维度
+    STORAGE = 3;
+}
+
+// 文件统计信息
+message FileStats {
+    // 文件总数
+    int32 total_files = 1;
+    // 总存储空间（字节）
+    int64 total_storage = 2;
+    // 各类型文件数量
+    map<string, int32> type_counts = 3;
+    // 各类型存储空间
+    map<string, int64> type_storage = 4;
+    // 处理任务统计
+    map<string, int32> process_stats = 5;
+    // 详细统计数据
+    map<string, int64> details = 6;
+} 

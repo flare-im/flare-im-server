@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package api.im.gateway;
+
+import "common/error.proto";
+
+option go_package = "github.com/flare/api/im/gateway;gateway";
+option java_multiple_files = true;
+option java_package = "api.im.gateway";
+
+// API网关服务
+service ApiGateway {
+    // 获取可用的消息网关
+    rpc GetAvailableMessageGateway (GetAvailableMessageGatewayRequest) returns (GetAvailableMessageGatewayResponse);
+    // 验证访问令牌
+    rpc ValidateAccessToken (ValidateAccessTokenRequest) returns (ValidateAccessTokenResponse);
+    // 获取服务配置
+    rpc GetServiceConfig (GetServiceConfigRequest) returns (GetServiceConfigResponse);
+}
+
+// 获取可用消息网关请求
+message GetAvailableMessageGatewayRequest {
+    // 平台类型
+    string platform = 1;
+    // 客户端版本
+    string client_version = 2;
+    // 地理位置信息
+    GeoLocation location = 3;
+}
+
+// 获取可用消息网关响应
+message GetAvailableMessageGatewayResponse {
+    // 网关列表
+    repeated GatewayInfo gateways = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 网关信息
+message GatewayInfo {
+    // 网关ID
+    string gateway_id = 1;
+    // 网关地址
+    string host = 2;
+    // WebSocket端口
+    int32 ws_port = 3;
+    // QUIC端口
+    int32 quic_port = 4;
+    // 网关权重
+    int32 weight = 5;
+    // 网关标签
+    map<string, string> tags = 6;
+}
+
+// 地理位置信息
+message GeoLocation {
+    // 经度
+    double longitude = 1;
+    // 纬度
+    double latitude = 2;
+    // 国家
+    string country = 3;
+    // 省份
+    string province = 4;
+    // 城市
+    string city = 5;
+}
+
+// 验证访问令牌请求
+message ValidateAccessTokenRequest {
+    // 访问令牌
+    string access_token = 1;
+}
+
+// 验证访问令牌响应
+message ValidateAccessTokenResponse {
+    // 是否有效
+    bool is_valid = 1;
+    // 用户ID
+    string user_id = 2;
+    // 租户ID
+    string tenant_id = 3;
+    // 错误信息
+    api.im.common.Error error = 4;
+}
+
+// 获取服务配置请求
+message GetServiceConfigRequest {
+    // 服务名称
+    string service_name = 1;
+}
+
+// 获取服务配置响应
+message GetServiceConfigResponse {
+    // 服务配置
+    map<string, string> config = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+} 

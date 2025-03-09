@@ -1,64 +1,65 @@
 env: development
 
 service:
-  name: message-router
-  host: 0.0.0.0
+  name: message-gateway
+  host: "127.0.0.1"
   port: 50051
+  weight: 100
   tags:
-    - grpc
-    - message
+    - "grpc"
+    - "gateway"
   metadata:
     version: "1.0.0"
 
 log:
-  output_dir: logs
-  file_prefix: message-router
-  level: 3  # DEBUG
+  output_dir: "logs"
+  file_prefix: "message-gateway"
+  level: 2  # INFO
   max_size: 100
   max_backups: 31
   max_age: 31
-  compress: false
+  compress: true
 
 consul:
-  host: localhost
+  host: "localhost"
   port: 8500
   register_interval: 10
   heartbeat_interval: 5
 
 redis:
-  host: localhost
+  host: "localhost"
   port: 6379
-  password: flare123
   database: 0
-  pool_size: 20
+  pool_size: 10
 
 kafka:
   brokers:
-    - localhost:9092
-  group_id: message-router-dev
+    - "localhost:9092"
+  group_id: "message-gateway"
   topics:
-    - message.send
-    - message.deliver
-    - message.ack
+    - "messages"
+    - "notifications"
 
 postgres:
-  host: localhost
+  host: "localhost"
   port: 5432
-  database: flare_im_dev
-  username: flare
-  password: flare123
-  pool_size: 20
-
-clickhouse:
-  host: localhost
-  port: 19000
-  database: flare_im_dev
-  username: flare
-  password: flare123
+  database: "flare_im"
+  username: "postgres"
+  password: "postgres"
   pool_size: 10
 
+minio:
+  endpoint: "localhost:9000"
+  access_key: "minioadmin"
+  secret_key: "minioadmin"
+  use_ssl: false
+  bucket: "media"
+
 extensions:
-  message_queue:
-    max_retry: 3
-    retry_interval: 5
-    batch_size: 100 
+  websocket:
+    port: 8080
+  quic:
+    port: 8081
+    cert_path: "certs/cert.pem"
+    key_path: "certs/key.pem"
+    server_name: "flare.im.quic.cn" 

@@ -1,0 +1,318 @@
+syntax = "proto3";
+
+package api.im.business.user;
+
+import "common/error.proto";
+import "common/enums.proto";
+
+option go_package = "github.com/flare/api/im/business/user;user";
+option java_multiple_files = true;
+option java_package = "api.im.business.user";
+
+// 用户服务
+service UserService {
+    // 用户注册
+    rpc Register (RegisterRequest) returns (RegisterResponse);
+    // 用户登录
+    rpc Login (LoginRequest) returns (LoginResponse);
+    // 用户登出
+    rpc Logout (LogoutRequest) returns (LogoutResponse);
+    // 获取用户信息
+    rpc GetUserInfo (GetUserInfoRequest) returns (GetUserInfoResponse);
+    // 更新用户信息
+    rpc UpdateUserInfo (UpdateUserInfoRequest) returns (UpdateUserInfoResponse);
+    // 搜索用户
+    rpc SearchUsers (SearchUsersRequest) returns (SearchUsersResponse);
+    // 批量获取用户信息
+    rpc BatchGetUserInfo (BatchGetUserInfoRequest) returns (BatchGetUserInfoResponse);
+    // 更新用户状态
+    rpc UpdateUserStatus (UpdateUserStatusRequest) returns (UpdateUserStatusResponse);
+    // 获取用户设置
+    rpc GetUserSettings (GetUserSettingsRequest) returns (GetUserSettingsResponse);
+    // 更新用户设置
+    rpc UpdateUserSettings (UpdateUserSettingsRequest) returns (UpdateUserSettingsResponse);
+}
+
+// 用户信息
+message UserInfo {
+    // 用户ID
+    string user_id = 1;
+    // 用户名
+    string username = 2;
+    // 昵称
+    string nickname = 3;
+    // 头像URL
+    string avatar_url = 4;
+    // 性别
+    api.im.common.Gender gender = 5;
+    // 生日
+    int64 birthday = 6;
+    // 手机号
+    string phone = 7;
+    // 邮箱
+    string email = 8;
+    // 地区
+    string region = 9;
+    // 个性签名
+    string signature = 10;
+    // 扩展信息
+    map<string, string> extra = 11;
+    // 创建时间
+    int64 create_time = 12;
+    // 更新时间
+    int64 update_time = 13;
+}
+
+// 用户设置
+message UserSettings {
+    // 隐私设置
+    PrivacySettings privacy = 1;
+    // 通知设置
+    NotificationSettings notification = 2;
+    // 安全设置
+    SecuritySettings security = 3;
+    // 其他设置
+    map<string, string> other_settings = 4;
+}
+
+// 隐私设置
+message PrivacySettings {
+    // 添加好友方式
+    api.im.common.PrivacyRule add_friend_rule = 1;
+    // 查看资料方式
+    api.im.common.PrivacyRule view_profile_rule = 2;
+    // 查看动态方式
+    api.im.common.PrivacyRule view_moments_rule = 3;
+    // 自定义规则
+    map<string, api.im.common.PrivacyRule> custom_rules = 4;
+}
+
+// 通知设置
+message NotificationSettings {
+    // 是否开启新消息通知
+    bool enable_new_msg_notify = 1;
+    // 是否开启声音
+    bool enable_sound = 2;
+    // 是否开启震动
+    bool enable_vibrate = 3;
+    // 是否显示消息详情
+    bool show_message_detail = 4;
+    // 免打扰时间段
+    repeated TimeRange quiet_hours = 5;
+}
+
+// 安全设置
+message SecuritySettings {
+    // 是否开启登录验证
+    bool enable_login_verify = 1;
+    // 是否开启指纹解锁
+    bool enable_fingerprint = 2;
+    // 是否开启设备锁定
+    bool enable_device_lock = 3;
+    // 是否开启敏感信息加密
+    bool enable_sensitive_info_encrypt = 4;
+}
+
+// 时间范围
+message TimeRange {
+    // 开始时间（分钟）
+    int32 start_minutes = 1;
+    // 结束时间（分钟）
+    int32 end_minutes = 2;
+}
+
+// 注册请求
+message RegisterRequest {
+    // 用户名
+    string username = 1;
+    // 密码
+    string password = 2;
+    // 验证码
+    string verify_code = 3;
+    // 设备信息
+    DeviceInfo device = 4;
+    // 初始用户信息
+    map<string, string> initial_info = 5;
+}
+
+// 注册响应
+message RegisterResponse {
+    // 用户信息
+    UserInfo user = 1;
+    // 访问令牌
+    string access_token = 2;
+    // 刷新令牌
+    string refresh_token = 3;
+    // 错误信息
+    api.im.common.Error error = 4;
+}
+
+// 登录请求
+message LoginRequest {
+    // 用户名
+    string username = 1;
+    // 密码
+    string password = 2;
+    // 设备信息
+    DeviceInfo device = 3;
+}
+
+// 登录响应
+message LoginResponse {
+    // 用户信息
+    UserInfo user = 1;
+    // 访问令牌
+    string access_token = 2;
+    // 刷新令牌
+    string refresh_token = 3;
+    // 错误信息
+    api.im.common.Error error = 4;
+}
+
+// 登出请求
+message LogoutRequest {
+    // 用户ID
+    string user_id = 1;
+    // 设备ID
+    string device_id = 2;
+}
+
+// 登出响应
+message LogoutResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取用户信息请求
+message GetUserInfoRequest {
+    // 用户ID
+    string user_id = 1;
+}
+
+// 获取用户信息响应
+message GetUserInfoResponse {
+    // 用户信息
+    UserInfo user = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 更新用户信息请求
+message UpdateUserInfoRequest {
+    // 用户ID
+    string user_id = 1;
+    // 更新字段
+    map<string, string> updates = 2;
+}
+
+// 更新用户信息响应
+message UpdateUserInfoResponse {
+    // 用户信息
+    UserInfo user = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 搜索用户请求
+message SearchUsersRequest {
+    // 搜索关键词
+    string keyword = 1;
+    // 搜索字段
+    repeated api.im.common.SearchField search_fields = 2;
+    // 分页大小
+    int32 page_size = 3;
+    // 分页标记
+    string page_token = 4;
+}
+
+// 搜索用户响应
+message SearchUsersResponse {
+    // 用户列表
+    repeated UserInfo users = 1;
+    // 总数
+    int32 total = 2;
+    // 下一页标记
+    string next_page_token = 3;
+    // 错误信息
+    api.im.common.Error error = 4;
+}
+
+// 批量获取用户信息请求
+message BatchGetUserInfoRequest {
+    // 用户ID列表
+    repeated string user_ids = 1;
+}
+
+// 批量获取用户信息响应
+message BatchGetUserInfoResponse {
+    // 用户信息映射
+    map<string, UserInfo> users = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 更新用户状态请求
+message UpdateUserStatusRequest {
+    // 用户ID
+    string user_id = 1;
+    // 在线状态
+    api.im.common.OnlineStatus status = 2;
+    // 扩展信息
+    map<string, string> extra = 3;
+}
+
+// 更新用户状态响应
+message UpdateUserStatusResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取用户设置请求
+message GetUserSettingsRequest {
+    // 用户ID
+    string user_id = 1;
+}
+
+// 获取用户设置响应
+message GetUserSettingsResponse {
+    // 用户设置
+    UserSettings settings = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 更新用户设置请求
+message UpdateUserSettingsRequest {
+    // 用户ID
+    string user_id = 1;
+    // 更新字段
+    map<string, string> updates = 2;
+}
+
+// 更新用户设置响应
+message UpdateUserSettingsResponse {
+    // 用户设置
+    UserSettings settings = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 设备信息
+message DeviceInfo {
+    // 设备ID
+    string device_id = 1;
+    // 设备类型
+    api.im.common.Platform platform = 2;
+    // 设备名称
+    string device_name = 3;
+    // 系统版本
+    string os_version = 4;
+    // APP版本
+    string app_version = 5;
+    // 设备标识
+    string device_token = 6;
+} 

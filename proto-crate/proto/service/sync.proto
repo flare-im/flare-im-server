@@ -1,0 +1,192 @@
+syntax = "proto3";
+
+package api.im.service.sync;
+
+import "common/enums.proto";
+
+option go_package = "github.com/flare-im/flare-im-server/proto-crate/api/im/service/sync";
+
+// 消息同步服务
+service MessageSync {
+  // 同步请求
+  rpc Sync(SyncRequest) returns (SyncResponse);
+  
+  // 增量同步
+  rpc IncrementalSync(IncrementalSyncRequest) returns (IncrementalSyncResponse);
+  
+  // 全量同步
+  rpc FullSync(FullSyncRequest) returns (FullSyncResponse);
+  
+  // 消息操作
+  rpc MessageOperation(MessageOperationRequest) returns (MessageOperationResponse);
+  
+  // 状态同步
+  rpc SyncStatus(SyncStatusRequest) returns (SyncStatusResponse);
+  
+  // 获取序列号
+  rpc GetSequence(GetSequenceRequest) returns (GetSequenceResponse);
+}
+
+// 同步请求
+message SyncRequest {
+  string user_id = 1;
+  string device_id = 2;
+  int64 last_sync_time = 3;
+  int64 last_sequence = 4;
+  api.im.common.SyncType sync_type = 5;
+}
+
+// 同步响应
+message SyncResponse {
+  repeated Message messages = 1;
+  repeated Conversation conversations = 2;
+  int64 current_sequence = 3;
+  int64 sync_time = 4;
+  bool has_more = 5;
+}
+
+// 增量同步请求
+message IncrementalSyncRequest {
+  string user_id = 1;
+  string device_id = 2;
+  int64 last_sequence = 3;
+  int32 limit = 4;
+}
+
+// 增量同步响应
+message IncrementalSyncResponse {
+  repeated Message messages = 1;
+  repeated MessageOperation operations = 2;
+  int64 current_sequence = 3;
+  bool has_more = 4;
+}
+
+// 全量同步请求
+message FullSyncRequest {
+  string user_id = 1;
+  string device_id = 2;
+  int32 limit = 3;
+  int32 offset = 4;
+}
+
+// 全量同步响应
+message FullSyncResponse {
+  repeated Message messages = 1;
+  repeated Conversation conversations = 2;
+  repeated UserStatus user_statuses = 3;
+  int64 current_sequence = 4;
+  bool has_more = 5;
+}
+
+// 消息操作
+message MessageOperation {
+  string message_id = 1;
+  api.im.common.OperationType operation_type = 2;
+  bytes operation_data = 3;
+  int64 sequence = 4;
+  int64 timestamp = 5;
+}
+
+// 消息操作请求
+message MessageOperationRequest {
+  string user_id = 1;
+  string device_id = 2;
+  string message_id = 3;
+  api.im.common.OperationType operation_type = 4;
+  bytes operation_data = 5;
+}
+
+// 消息操作响应
+message MessageOperationResponse {
+  bool success = 1;
+  int64 sequence = 2;
+  int64 timestamp = 3;
+}
+
+// 状态同步请求
+message SyncStatusRequest {
+  string user_id = 1;
+  string device_id = 2;
+  repeated string message_ids = 3;
+  api.im.common.StatusType status_type = 4;
+}
+
+// 状态同步响应
+message SyncStatusResponse {
+  repeated MessageStatus message_statuses = 1;
+  int64 sync_time = 2;
+}
+
+// 获取序列号请求
+message GetSequenceRequest {
+  string conversation_id = 1;
+  int32 count = 2;
+}
+
+// 获取序列号响应
+message GetSequenceResponse {
+  int64 start_sequence = 1;
+  int64 end_sequence = 2;
+}
+
+// 消息
+message Message {
+  string id = 1;
+  string conversation_id = 2;
+  string sender_id = 3;
+  string content = 4;
+  api.im.common.ContentType content_type = 5;
+  MessageMetadata metadata = 6;
+  MessageStatus status = 7;
+  int64 sequence = 8;
+  int64 created_at = 9;
+  int64 updated_at = 10;
+}
+
+// 消息元数据
+message MessageMetadata {
+  map<string, string> custom_data = 1;
+  repeated string mentions = 2;
+  string reply_to = 3;
+  string forward_from = 4;
+}
+
+// 消息状态
+message MessageStatus {
+  string message_id = 1;
+  api.im.common.MsgStatus status = 2;
+  repeated string received_by = 3;
+  repeated string read_by = 4;
+  int64 updated_at = 5;
+}
+
+// 会话
+message Conversation {
+  string id = 1;
+  api.im.common.SessionType type = 2;
+  string name = 3;
+  string avatar = 4;
+  repeated string members = 5;
+  string owner_id = 6;
+  ConversationSettings settings = 7;
+  Message last_message = 8;
+  int32 unread_count = 9;
+  int64 created_at = 10;
+  int64 updated_at = 11;
+}
+
+// 会话设置
+message ConversationSettings {
+  bool mute = 1;
+  bool stick_on_top = 2;
+  bool join_approval_required = 3;
+  bool only_owner_send = 4;
+}
+
+// 用户状态
+message UserStatus {
+  string user_id = 1;
+  api.im.common.OnlineStatus online_status = 2;
+  string device_id = 3;
+  int64 last_active_at = 4;
+} 

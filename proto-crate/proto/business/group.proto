@@ -1,0 +1,600 @@
+syntax = "proto3";
+
+package api.im.business.group;
+
+import "common/error.proto";
+import "common/enums.proto";
+
+option go_package = "github.com/flare/api/im/business/group;group";
+option java_multiple_files = true;
+option java_package = "api.im.business.group";
+
+// 群组服务
+service GroupService {
+    // 创建群组
+    rpc CreateGroup (CreateGroupRequest) returns (CreateGroupResponse);
+    // 解散群组
+    rpc DismissGroup (DismissGroupRequest) returns (DismissGroupResponse);
+    // 获取群组信息
+    rpc GetGroupInfo (GetGroupInfoRequest) returns (GetGroupInfoResponse);
+    // 更新群组信息
+    rpc UpdateGroupInfo (UpdateGroupInfoRequest) returns (UpdateGroupInfoResponse);
+    // 获取群组列表
+    rpc GetGroupList (GetGroupListRequest) returns (GetGroupListResponse);
+    // 加入群组
+    rpc JoinGroup (JoinGroupRequest) returns (JoinGroupResponse);
+    // 退出群组
+    rpc QuitGroup (QuitGroupRequest) returns (QuitGroupResponse);
+    // 邀请加入群组
+    rpc InviteToGroup (InviteToGroupRequest) returns (InviteToGroupResponse);
+    // 踢出群组
+    rpc KickFromGroup (KickFromGroupRequest) returns (KickFromGroupResponse);
+    // 转让群组
+    rpc TransferGroup (TransferGroupRequest) returns (TransferGroupResponse);
+    // 获取群成员列表
+    rpc GetGroupMembers (GetGroupMembersRequest) returns (GetGroupMembersResponse);
+    // 更新群成员角色
+    rpc UpdateMemberRole (UpdateMemberRoleRequest) returns (UpdateMemberRoleResponse);
+    // 批量获取群组信息
+    rpc BatchGetGroupInfo (BatchGetGroupInfoRequest) returns (BatchGetGroupInfoResponse);
+    // 搜索群组
+    rpc SearchGroups (SearchGroupsRequest) returns (SearchGroupsResponse);
+    // 获取群组设置
+    rpc GetGroupSettings (GetGroupSettingsRequest) returns (GetGroupSettingsResponse);
+    // 更新群组设置
+    rpc UpdateGroupSettings (UpdateGroupSettingsRequest) returns (UpdateGroupSettingsResponse);
+    // 获取群组统计信息
+    rpc GetGroupStats (GetGroupStatsRequest) returns (GetGroupStatsResponse);
+    // 处理入群申请
+    rpc HandleJoinRequest (HandleJoinRequestRequest) returns (HandleJoinRequestResponse);
+    // 获取群组邀请列表
+    rpc GetGroupInvitations (GetGroupInvitationsRequest) returns (GetGroupInvitationsResponse);
+    // 处理群组邀请
+    rpc HandleGroupInvitation (HandleGroupInvitationRequest) returns (HandleGroupInvitationResponse);
+}
+
+// 群组信息
+message GroupInfo {
+    // 群组ID
+    string group_id = 1;
+    // 群组名称
+    string name = 2;
+    // 群组头像
+    string avatar_url = 3;
+    // 群组类型
+    api.im.common.GroupType type = 4;
+    // 群主ID
+    string owner_id = 5;
+    // 群组简介
+    string description = 6;
+    // 群组公告
+    string announcement = 7;
+    // 群组标签
+    repeated string tags = 8;
+    // 成员数量
+    int32 member_count = 9;
+    // 最大成员数
+    int32 max_member_count = 10;
+    // 扩展信息
+    map<string, string> extra = 11;
+    // 创建时间
+    int64 create_time = 12;
+    // 更新时间
+    int64 update_time = 13;
+}
+
+// 群组成员信息
+message GroupMemberInfo {
+    // 群组ID
+    string group_id = 1;
+    // 用户ID
+    string user_id = 2;
+    // 群昵称
+    string nickname = 3;
+    // 成员角色
+    api.im.common.MemberRole role = 4;
+    // 加入时间
+    int64 join_time = 5;
+    // 最后互动时间
+    int64 last_active_time = 6;
+    // 禁言截止时间
+    int64 mute_until = 7;
+    // 扩展信息
+    map<string, string> extra = 8;
+}
+
+// 群组设置
+message GroupSettings {
+    // 加入方式
+    JoinType join_type = 1;
+    // 邀请权限
+    InvitePermission invite_permission = 2;
+    // 消息提醒类型
+    NotifyType notify_type = 3;
+    // 是否全员禁言
+    bool mute_all = 4;
+    // 是否允许查看历史消息
+    bool allow_view_history = 5;
+    // 是否开启群管理员
+    bool enable_admin = 6;
+    // 自定义设置
+    map<string, string> custom_settings = 7;
+}
+
+// 加入方式
+enum JoinType {
+    // 自由加入
+    FREE = 0;
+    // 需要验证
+    NEED_VERIFY = 1;
+    // 仅限邀请
+    INVITE_ONLY = 2;
+}
+
+// 邀请权限
+enum InvitePermission {
+    // 所有人可邀请
+    ALL_MEMBERS = 0;
+    // 仅管理员可邀请
+    ADMIN_ONLY = 1;
+    // 仅群主可邀请
+    OWNER_ONLY = 2;
+}
+
+// 消息提醒类型
+enum NotifyType {
+    // 接收所有消息
+    ALL = 0;
+    // 仅@消息
+    AT_ONLY = 1;
+    // 不接收消息
+    NONE = 2;
+}
+
+// 创建群组请求
+message CreateGroupRequest {
+    // 群组名称
+    string name = 1;
+    // 群组类型
+    api.im.common.GroupType type = 2;
+    // 群组头像
+    string avatar_url = 3;
+    // 群组简介
+    string description = 4;
+    // 初始成员列表
+    repeated string member_ids = 5;
+    // 群组设置
+    GroupSettings settings = 6;
+    // 扩展信息
+    map<string, string> extra = 7;
+}
+
+// 创建群组响应
+message CreateGroupResponse {
+    // 群组信息
+    GroupInfo group = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 解散群组请求
+message DismissGroupRequest {
+    // 群组ID
+    string group_id = 1;
+    // 操作者ID
+    string operator_id = 2;
+}
+
+// 解散群组响应
+message DismissGroupResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取群组信息请求
+message GetGroupInfoRequest {
+    // 群组ID
+    string group_id = 1;
+}
+
+// 获取群组信息响应
+message GetGroupInfoResponse {
+    // 群组信息
+    GroupInfo group = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 更新群组信息请求
+message UpdateGroupInfoRequest {
+    // 群组ID
+    string group_id = 1;
+    // 操作者ID
+    string operator_id = 2;
+    // 更新字段
+    map<string, string> updates = 3;
+}
+
+// 更新群组信息响应
+message UpdateGroupInfoResponse {
+    // 群组信息
+    GroupInfo group = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取群组列表请求
+message GetGroupListRequest {
+    // 用户ID
+    string user_id = 1;
+    // 分页大小
+    int32 page_size = 2;
+    // 分页标记
+    string page_token = 3;
+}
+
+// 获取群组列表响应
+message GetGroupListResponse {
+    // 群组列表
+    repeated GroupInfo groups = 1;
+    // 下一页标记
+    string next_page_token = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 加入群组请求
+message JoinGroupRequest {
+    // 群组ID
+    string group_id = 1;
+    // 用户ID
+    string user_id = 2;
+    // 申请理由
+    string reason = 3;
+}
+
+// 加入群组响应
+message JoinGroupResponse {
+    // 加入结果
+    JoinResult result = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 加入结果
+enum JoinResult {
+    // 直接加入成功
+    JOINED = 0;
+    // 等待验证
+    WAITING = 1;
+    // 被拒绝
+    REJECTED = 2;
+}
+
+// 退出群组请求
+message QuitGroupRequest {
+    // 群组ID
+    string group_id = 1;
+    // 用户ID
+    string user_id = 2;
+}
+
+// 退出群组响应
+message QuitGroupResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 邀请加入群组请求
+message InviteToGroupRequest {
+    // 群组ID
+    string group_id = 1;
+    // 邀请者ID
+    string inviter_id = 2;
+    // 被邀请者ID列表
+    repeated string invitee_ids = 3;
+    // 邀请说明
+    string message = 4;
+}
+
+// 邀请加入群组响应
+message InviteToGroupResponse {
+    // 邀请结果
+    map<string, InviteResult> results = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 邀请结果
+message InviteResult {
+    // 是否成功
+    bool success = 1;
+    // 结果码
+    InviteResultCode code = 2;
+    // 错误信息
+    string message = 3;
+}
+
+// 邀请结果码
+enum InviteResultCode {
+    // 已发送邀请
+    SENT = 0;
+    // 已经是成员
+    ALREADY_MEMBER = 1;
+    // 达到人数上限
+    EXCEED_LIMIT = 2;
+    // 无权限邀请
+    NO_PERMISSION = 3;
+}
+
+// 踢出群组请求
+message KickFromGroupRequest {
+    // 群组ID
+    string group_id = 1;
+    // 操作者ID
+    string operator_id = 2;
+    // 被踢用户ID列表
+    repeated string target_ids = 3;
+    // 原因
+    string reason = 4;
+}
+
+// 踢出群组响应
+message KickFromGroupResponse {
+    // 踢出结果
+    map<string, bool> results = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 转让群组请求
+message TransferGroupRequest {
+    // 群组ID
+    string group_id = 1;
+    // 原群主ID
+    string from_user_id = 2;
+    // 新群主ID
+    string to_user_id = 3;
+}
+
+// 转让群组响应
+message TransferGroupResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取群成员列表请求
+message GetGroupMembersRequest {
+    // 群组ID
+    string group_id = 1;
+    // 分页大小
+    int32 page_size = 2;
+    // 分页标记
+    string page_token = 3;
+}
+
+// 获取群成员列表响应
+message GetGroupMembersResponse {
+    // 成员列表
+    repeated GroupMemberInfo members = 1;
+    // 下一页标记
+    string next_page_token = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 更新群成员角色请求
+message UpdateMemberRoleRequest {
+    // 群组ID
+    string group_id = 1;
+    // 操作者ID
+    string operator_id = 2;
+    // 目标用户ID
+    string target_id = 3;
+    // 新角色
+    api.im.common.MemberRole new_role = 4;
+}
+
+// 更新群成员角色响应
+message UpdateMemberRoleResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 批量获取群组信息请求
+message BatchGetGroupInfoRequest {
+    // 群组ID列表
+    repeated string group_ids = 1;
+}
+
+// 批量获取群组信息响应
+message BatchGetGroupInfoResponse {
+    // 群组信息映射
+    map<string, GroupInfo> groups = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 搜索群组请求
+message SearchGroupsRequest {
+    // 搜索关键词
+    string keyword = 1;
+    // 群组类型
+    repeated api.im.common.GroupType types = 2;
+    // 分页大小
+    int32 page_size = 3;
+    // 分页标记
+    string page_token = 4;
+}
+
+// 搜索群组响应
+message SearchGroupsResponse {
+    // 群组列表
+    repeated GroupInfo groups = 1;
+    // 总数
+    int32 total = 2;
+    // 下一页标记
+    string next_page_token = 3;
+    // 错误信息
+    api.im.common.Error error = 4;
+}
+
+// 获取群组设置请求
+message GetGroupSettingsRequest {
+    // 群组ID
+    string group_id = 1;
+}
+
+// 获取群组设置响应
+message GetGroupSettingsResponse {
+    // 群组设置
+    GroupSettings settings = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 更新群组设置请求
+message UpdateGroupSettingsRequest {
+    // 群组ID
+    string group_id = 1;
+    // 操作者ID
+    string operator_id = 2;
+    // 更新字段
+    map<string, string> updates = 3;
+}
+
+// 更新群组设置响应
+message UpdateGroupSettingsResponse {
+    // 群组设置
+    GroupSettings settings = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取群组统计信息请求
+message GetGroupStatsRequest {
+    // 群组ID
+    string group_id = 1;
+}
+
+// 获取群组统计信息响应
+message GetGroupStatsResponse {
+    // 统计信息
+    GroupStats stats = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 群组统计信息
+message GroupStats {
+    // 总成员数
+    int32 total_members = 1;
+    // 活跃成员数
+    int32 active_members = 2;
+    // 今日消息数
+    int32 today_messages = 3;
+    // 本周消息数
+    int32 week_messages = 4;
+    // 本月消息数
+    int32 month_messages = 5;
+    // 详细统计数据
+    map<string, int64> details = 6;
+}
+
+// 处理入群申请请求
+message HandleJoinRequestRequest {
+    // 申请ID
+    string request_id = 1;
+    // 操作者ID
+    string operator_id = 2;
+    // 是否同意
+    bool approved = 3;
+    // 处理说明
+    string reason = 4;
+}
+
+// 处理入群申请响应
+message HandleJoinRequestResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取群组邀请列表请求
+message GetGroupInvitationsRequest {
+    // 用户ID
+    string user_id = 1;
+    // 分页大小
+    int32 page_size = 2;
+    // 分页标记
+    string page_token = 3;
+}
+
+// 获取群组邀请列表响应
+message GetGroupInvitationsResponse {
+    // 邀请列表
+    repeated GroupInvitation invitations = 1;
+    // 下一页标记
+    string next_page_token = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 群组邀请信息
+message GroupInvitation {
+    // 邀请ID
+    string invitation_id = 1;
+    // 群组ID
+    string group_id = 2;
+    // 邀请者ID
+    string inviter_id = 3;
+    // 被邀请者ID
+    string invitee_id = 4;
+    // 邀请说明
+    string message = 5;
+    // 邀请状态
+    InvitationStatus status = 6;
+    // 创建时间
+    int64 create_time = 7;
+    // 处理时间
+    int64 handle_time = 8;
+}
+
+// 邀请状态
+enum InvitationStatus {
+    // 待处理
+    PENDING = 0;
+    // 已接受
+    ACCEPTED = 1;
+    // 已拒绝
+    DECLINED = 2;
+    // 已过期
+    EXPIRED = 3;
+}
+
+// 处理群组邀请请求
+message HandleGroupInvitationRequest {
+    // 邀请ID
+    string invitation_id = 1;
+    // 是否接受
+    bool accept = 2;
+    // 处理说明
+    string reason = 3;
+}
+
+// 处理群组邀请响应
+message HandleGroupInvitationResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+} 

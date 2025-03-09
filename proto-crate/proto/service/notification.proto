@@ -1,0 +1,346 @@
+syntax = "proto3";
+
+package api.im.service.notification;
+
+import "common/error.proto";
+import "common/enums.proto";
+
+option go_package = "github.com/flare/api/im/service/notification;notification";
+option java_multiple_files = true;
+option java_package = "api.im.service.notification";
+
+// 通知推送服务
+service NotificationService {
+    // 发送通知
+    rpc SendNotification (SendNotificationRequest) returns (SendNotificationResponse);
+    // 批量发送通知
+    rpc BatchSendNotification (BatchSendNotificationRequest) returns (BatchSendNotificationResponse);
+    // 创建推送模板
+    rpc CreatePushTemplate (CreatePushTemplateRequest) returns (CreatePushTemplateResponse);
+    // 更新推送模板
+    rpc UpdatePushTemplate (UpdatePushTemplateRequest) returns (UpdatePushTemplateResponse);
+    // 删除推送模板
+    rpc DeletePushTemplate (DeletePushTemplateRequest) returns (DeletePushTemplateResponse);
+    // 获取推送模板
+    rpc GetPushTemplate (GetPushTemplateRequest) returns (GetPushTemplateResponse);
+    // 注册设备
+    rpc RegisterDevice (RegisterDeviceRequest) returns (RegisterDeviceResponse);
+    // 更新设备信息
+    rpc UpdateDevice (UpdateDeviceRequest) returns (UpdateDeviceResponse);
+    // 注销设备
+    rpc UnregisterDevice (UnregisterDeviceRequest) returns (UnregisterDeviceResponse);
+    // 获取推送统计
+    rpc GetPushStats (GetPushStatsRequest) returns (GetPushStatsResponse);
+}
+
+// 通知信息
+message NotificationInfo {
+    // 通知ID
+    string notification_id = 1;
+    // 通知类型
+    api.im.common.NotificationType type = 2;
+    // 标题
+    string title = 3;
+    // 内容
+    string content = 4;
+    // 数据负载
+    bytes payload = 5;
+    // 目标用户ID
+    string target_user_id = 6;
+    // 发送者ID
+    string sender_id = 7;
+    // 发送时间
+    int64 send_time = 8;
+    // 过期时间
+    int64 expire_time = 9;
+    // 优先级
+    int32 priority = 10;
+    // 通知选项
+    map<string, string> options = 11;
+}
+
+// 推送模板信息
+message PushTemplateInfo {
+    // 模板ID
+    string template_id = 1;
+    // 模板名称
+    string name = 2;
+    // 模板类型
+    string type = 3;
+    // 标题模板
+    string title_template = 4;
+    // 内容模板
+    string content_template = 5;
+    // 默认选项
+    map<string, string> default_options = 6;
+    // 创建时间
+    int64 create_time = 7;
+    // 更新时间
+    int64 update_time = 8;
+}
+
+// 设备信息
+message DeviceInfo {
+    // 设备ID
+    string device_id = 1;
+    // 用户ID
+    string user_id = 2;
+    // 平台类型
+    api.im.common.Platform platform = 3;
+    // 推送令牌
+    string push_token = 4;
+    // 设备名称
+    string device_name = 5;
+    // 系统版本
+    string os_version = 6;
+    // APP版本
+    string app_version = 7;
+    // 注册时间
+    int64 register_time = 8;
+    // 最后活跃时间
+    int64 last_active_time = 9;
+    // 设备状态
+    DeviceStatus status = 10;
+    // 设备配置
+    map<string, string> config = 11;
+}
+
+// 设备状态
+enum DeviceStatus {
+    // 活跃
+    ACTIVE = 0;
+    // 不活跃
+    INACTIVE = 1;
+    // 已禁用
+    DISABLED = 2;
+}
+
+// 发送通知请求
+message SendNotificationRequest {
+    // 通知信息
+    NotificationInfo notification = 1;
+    // 推送模板ID
+    string template_id = 2;
+    // 模板参数
+    map<string, string> template_params = 3;
+}
+
+// 发送通知响应
+message SendNotificationResponse {
+    // 通知ID
+    string notification_id = 1;
+    // 推送结果
+    PushResult push_result = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 批量发送通知请求
+message BatchSendNotificationRequest {
+    // 通知列表
+    repeated NotificationInfo notifications = 1;
+    // 推送模板ID
+    string template_id = 2;
+    // 模板参数
+    map<string, string> template_params = 3;
+}
+
+// 批量发送通知响应
+message BatchSendNotificationResponse {
+    // 推送结果列表
+    map<string, PushResult> push_results = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 推送结果
+message PushResult {
+    // 是否成功
+    bool success = 1;
+    // 推送时间
+    int64 push_time = 2;
+    // 设备推送结果
+    map<string, DevicePushResult> device_results = 3;
+}
+
+// 设备推送结果
+message DevicePushResult {
+    // 是否成功
+    bool success = 1;
+    // 错误码
+    string error_code = 2;
+    // 错误信息
+    string error_message = 3;
+    // 推送ID
+    string push_id = 4;
+}
+
+// 创建推送模板请求
+message CreatePushTemplateRequest {
+    // 模板名称
+    string name = 1;
+    // 模板类型
+    string type = 2;
+    // 标题模板
+    string title_template = 3;
+    // 内容模板
+    string content_template = 4;
+    // 默认选项
+    map<string, string> default_options = 5;
+}
+
+// 创建推送模板响应
+message CreatePushTemplateResponse {
+    // 模板信息
+    PushTemplateInfo template = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 更新推送模板请求
+message UpdatePushTemplateRequest {
+    // 模板ID
+    string template_id = 1;
+    // 更新字段
+    map<string, string> updates = 2;
+}
+
+// 更新推送模板响应
+message UpdatePushTemplateResponse {
+    // 模板信息
+    PushTemplateInfo template = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 删除推送模板请求
+message DeletePushTemplateRequest {
+    // 模板ID
+    string template_id = 1;
+}
+
+// 删除推送模板响应
+message DeletePushTemplateResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取推送模板请求
+message GetPushTemplateRequest {
+    // 模板ID
+    string template_id = 1;
+}
+
+// 获取推送模板响应
+message GetPushTemplateResponse {
+    // 模板信息
+    PushTemplateInfo template = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 注册设备请求
+message RegisterDeviceRequest {
+    // 用户ID
+    string user_id = 1;
+    // 平台类型
+    api.im.common.Platform platform = 2;
+    // 推送令牌
+    string push_token = 3;
+    // 设备名称
+    string device_name = 4;
+    // 系统版本
+    string os_version = 5;
+    // APP版本
+    string app_version = 6;
+    // 设备配置
+    map<string, string> config = 7;
+}
+
+// 注册设备响应
+message RegisterDeviceResponse {
+    // 设备信息
+    DeviceInfo device = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 更新设备信息请求
+message UpdateDeviceRequest {
+    // 设备ID
+    string device_id = 1;
+    // 更新字段
+    map<string, string> updates = 2;
+}
+
+// 更新设备信息响应
+message UpdateDeviceResponse {
+    // 设备信息
+    DeviceInfo device = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 注销设备请求
+message UnregisterDeviceRequest {
+    // 设备ID
+    string device_id = 1;
+    // 用户ID
+    string user_id = 2;
+}
+
+// 注销设备响应
+message UnregisterDeviceResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取推送统计请求
+message GetPushStatsRequest {
+    // 开始时间
+    int64 start_time = 1;
+    // 结束时间
+    int64 end_time = 2;
+    // 统计维度
+    repeated PushStatsDimension dimensions = 3;
+}
+
+// 获取推送统计响应
+message GetPushStatsResponse {
+    // 统计结果
+    map<string, PushStatsResult> stats = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 推送统计维度
+enum PushStatsDimension {
+    // 平台维度
+    PLATFORM = 0;
+    // 通知类型维度
+    NOTIFICATION_TYPE = 1;
+    // 时间维度
+    TIME = 2;
+    // 推送结果维度
+    PUSH_RESULT = 3;
+}
+
+// 推送统计结果
+message PushStatsResult {
+    // 总推送数
+    int64 total_count = 1;
+    // 成功数
+    int64 success_count = 2;
+    // 失败数
+    int64 failed_count = 3;
+    // 送达数
+    int64 delivered_count = 4;
+    // 点击数
+    int64 clicked_count = 5;
+    // 详细数据
+    map<string, int64> details = 6;
+} 

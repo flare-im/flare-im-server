@@ -1,0 +1,289 @@
+syntax = "proto3";
+
+package api.im.service.store;
+
+import "common/message.proto";
+import "common/error.proto";
+import "common/enums.proto";
+
+option go_package = "github.com/flare/api/im/service/store;store";
+option java_multiple_files = true;
+option java_package = "api.im.service.store";
+
+// 消息存储服务
+service MessageStore {
+    // 存储消息
+    rpc StoreMessage (StoreMessageRequest) returns (StoreMessageResponse);
+    // 批量存储消息
+    rpc BatchStoreMessage (BatchStoreMessageRequest) returns (BatchStoreMessageResponse);
+    // 获取消息
+    rpc GetMessage (GetMessageRequest) returns (GetMessageResponse);
+    // 批量获取消息
+    rpc BatchGetMessage (BatchGetMessageRequest) returns (BatchGetMessageResponse);
+    // 获取会话消息列表
+    rpc GetSessionMessages (GetSessionMessagesRequest) returns (GetSessionMessagesResponse);
+    // 删除消息
+    rpc DeleteMessage (DeleteMessageRequest) returns (DeleteMessageResponse);
+    // 更新消息
+    rpc UpdateMessage (UpdateMessageRequest) returns (UpdateMessageResponse);
+    // 搜索消息
+    rpc SearchMessage (SearchMessageRequest) returns (SearchMessageResponse);
+    // 获取消息统计
+    rpc GetMessageStats (GetMessageStatsRequest) returns (GetMessageStatsResponse);
+}
+
+// 消息存储信息
+message MessageStoreInfo {
+    // 消息数据
+    api.im.common.MessageData message = 1;
+    // 存储时间
+    int64 store_time = 2;
+    // 存储状态
+    MessageStoreStatus store_status = 3;
+    // 分片信息
+    ShardingInfo sharding_info = 4;
+    // 存储选项
+    map<string, string> store_options = 5;
+}
+
+// 消息存储状态
+enum MessageStoreStatus {
+    // 待存储
+    PENDING = 0;
+    // 已存储
+    STORED = 1;
+    // 存储失败
+    FAILED = 2;
+    // 已归档
+    ARCHIVED = 3;
+}
+
+// 分片信息
+message ShardingInfo {
+    // 分片ID
+    string shard_id = 1;
+    // 分片键
+    string shard_key = 2;
+    // 存储节点
+    string storage_node = 3;
+    // 存储层级
+    StorageLevel storage_level = 4;
+}
+
+// 存储层级
+enum StorageLevel {
+    // 缓存层
+    CACHE = 0;
+    // 活跃层
+    ACTIVE = 1;
+    // 归档层
+    ARCHIVE = 2;
+}
+
+// 存储消息请求
+message StoreMessageRequest {
+    // 消息数据
+    api.im.common.MessageData message = 1;
+    // 存储选项
+    map<string, string> options = 2;
+}
+
+// 存储消息响应
+message StoreMessageResponse {
+    // 消息ID
+    string message_id = 1;
+    // 存储信息
+    MessageStoreInfo store_info = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 批量存储消息请求
+message BatchStoreMessageRequest {
+    // 消息列表
+    repeated api.im.common.MessageData messages = 1;
+    // 存储选项
+    map<string, string> options = 2;
+}
+
+// 批量存储消息响应
+message BatchStoreMessageResponse {
+    // 存储结果
+    map<string, MessageStoreInfo> store_results = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取消息请求
+message GetMessageRequest {
+    // 消息ID
+    string message_id = 1;
+    // 会话ID
+    string session_id = 2;
+}
+
+// 获取消息响应
+message GetMessageResponse {
+    // 消息存储信息
+    MessageStoreInfo message = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 批量获取消息请求
+message BatchGetMessageRequest {
+    // 消息ID列表
+    repeated string message_ids = 1;
+    // 会话ID
+    string session_id = 2;
+}
+
+// 批量获取消息响应
+message BatchGetMessageResponse {
+    // 消息列表
+    map<string, MessageStoreInfo> messages = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取会话消息列表请求
+message GetSessionMessagesRequest {
+    // 会话ID
+    string session_id = 1;
+    // 起始消息ID
+    string start_message_id = 2;
+    // 结束消息ID
+    string end_message_id = 3;
+    // 消息数量限制
+    int32 limit = 4;
+    // 是否倒序
+    bool reverse = 5;
+}
+
+// 获取会话消息列表响应
+message GetSessionMessagesResponse {
+    // 消息列表
+    repeated MessageStoreInfo messages = 1;
+    // 是否还有更多
+    bool has_more = 2;
+    // 下一页起始消息ID
+    string next_message_id = 3;
+    // 错误信息
+    api.im.common.Error error = 4;
+}
+
+// 删除消息请求
+message DeleteMessageRequest {
+    // 消息ID
+    string message_id = 1;
+    // 会话ID
+    string session_id = 2;
+    // 删除选项
+    map<string, string> options = 3;
+}
+
+// 删除消息响应
+message DeleteMessageResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 更新消息请求
+message UpdateMessageRequest {
+    // 消息ID
+    string message_id = 1;
+    // 会话ID
+    string session_id = 2;
+    // 更新字段
+    map<string, string> updates = 3;
+}
+
+// 更新消息响应
+message UpdateMessageResponse {
+    // 更新后的消息
+    MessageStoreInfo message = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 搜索消息请求
+message SearchMessageRequest {
+    // 搜索关键词
+    string keyword = 1;
+    // 会话ID列表
+    repeated string session_ids = 2;
+    // 发送者ID列表
+    repeated string sender_ids = 3;
+    // 消息类型列表
+    repeated api.im.common.ContentType content_types = 4;
+    // 开始时间
+    int64 start_time = 5;
+    // 结束时间
+    int64 end_time = 6;
+    // 分页大小
+    int32 page_size = 7;
+    // 分页标记
+    string page_token = 8;
+}
+
+// 搜索消息响应
+message SearchMessageResponse {
+    // 消息列表
+    repeated MessageStoreInfo messages = 1;
+    // 总数
+    int32 total = 2;
+    // 下一页标记
+    string next_page_token = 3;
+    // 错误信息
+    api.im.common.Error error = 4;
+}
+
+// 获取消息统计请求
+message GetMessageStatsRequest {
+    // 会话ID列表
+    repeated string session_ids = 1;
+    // 开始时间
+    int64 start_time = 2;
+    // 结束时间
+    int64 end_time = 3;
+    // 统计维度
+    repeated StatsDimension dimensions = 4;
+}
+
+// 获取消息统计响应
+message GetMessageStatsResponse {
+    // 统计结果
+    map<string, StatsResult> stats = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 统计维度
+enum StatsDimension {
+    // 消息类型维度
+    CONTENT_TYPE = 0;
+    // 发送者维度
+    SENDER = 1;
+    // 时间维度
+    TIME = 2;
+    // 会话维度
+    SESSION = 3;
+}
+
+// 统计结果
+message StatsResult {
+    // 统计值
+    map<string, int64> values = 1;
+    // 趋势数据
+    repeated TimeSeriesData trend = 2;
+}
+
+// 时间序列数据
+message TimeSeriesData {
+    // 时间戳
+    int64 timestamp = 1;
+    // 数值
+    int64 value = 2;
+} 

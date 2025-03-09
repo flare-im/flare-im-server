@@ -48,6 +48,7 @@ enum MsgStatus{
 	Failed=3;//发送失败
 	Read=4;//已读
 	Revoked=5;//已撤回
+	Delivered=6;//已投递
 }
 //平台类型
 enum Platform{
@@ -119,4 +120,63 @@ enum OnlineStatus {
     ONLINE_STATUS_AWAY = 4;
     // 隐身
     ONLINE_STATUS_INVISIBLE = 5;
+}
+// 群组类型
+enum GroupType {
+    NORMAL = 0;
+    SUPER = 1;
+    CHANNEL = 2;
+}
+
+// 成员角色
+enum MemberRole {
+    MEMBER = 0;
+    ADMIN = 1;
+    OWNER = 2;
+}
+
+// 好友关系状态
+enum FriendStatus {
+    STRANGER = 0;
+    REQUESTING = 1;
+    REQUESTED = 2;
+    FRIEND = 3;
+    BLOCKED = 4;
+}
+
+// 通知类型
+enum NotificationType {
+    SYSTEM = 0;
+    FRIEND_REQUEST = 1;
+    GROUP_INVITATION = 2;
+    GROUP_APPLICATION = 3;
+    MESSAGE_RECALL = 4;
+    MESSAGE_REACTION = 5;
+}
+
+// 同步类型
+enum SyncType {
+    SYNC_TYPE_UNSPECIFIED = 0;
+    SYNC_TYPE_INCREMENTAL = 1;
+    SYNC_TYPE_FULL = 2;
+    SYNC_TYPE_QUICK = 3;
+}
+
+// 操作类型
+enum OperationType {
+    OPERATION_TYPE_UNSPECIFIED = 0;
+    OPERATION_TYPE_RECALL = 1;
+    OPERATION_TYPE_DELETE = 2;
+    OPERATION_TYPE_EDIT = 3;
+    OPERATION_TYPE_PIN = 4;
+    OPERATION_TYPE_UNPIN = 5;
+}
+
+// 状态类型
+enum StatusType {
+    STATUS_TYPE_UNSPECIFIED = 0;
+    STATUS_TYPE_DELIVERY = 1;
+    STATUS_TYPE_READ = 2;
+    STATUS_TYPE_ONLINE = 3;
+    STATUS_TYPE_TYPING = 4;
 }

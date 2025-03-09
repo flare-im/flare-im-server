@@ -1,0 +1,475 @@
+syntax = "proto3";
+
+package api.im.business.search;
+
+import "common/error.proto";
+import "common/enums.proto";
+import "business/media.proto";
+
+option go_package = "github.com/flare/api/im/business/search;search";
+option java_multiple_files = true;
+option java_package = "api.im.business.search";
+
+// 搜索服务
+service SearchService {
+    // 搜索消息
+    rpc SearchMessage (SearchMessageRequest) returns (SearchMessageResponse);
+    // 搜索用户
+    rpc SearchUser (SearchUserRequest) returns (SearchUserResponse);
+    // 搜索群组
+    rpc SearchGroup (SearchGroupRequest) returns (SearchGroupResponse);
+    // 搜索文件
+    rpc SearchFile (SearchFileRequest) returns (SearchFileResponse);
+    // 全局搜索
+    rpc GlobalSearch (GlobalSearchRequest) returns (GlobalSearchResponse);
+    // 获取搜索建议
+    rpc GetSearchSuggestions (GetSearchSuggestionsRequest) returns (GetSearchSuggestionsResponse);
+    // 获取热门搜索
+    rpc GetHotSearches (GetHotSearchesRequest) returns (GetHotSearchesResponse);
+    // 获取搜索历史
+    rpc GetSearchHistory (GetSearchHistoryRequest) returns (GetSearchHistoryResponse);
+    // 删除搜索历史
+    rpc DeleteSearchHistory (DeleteSearchHistoryRequest) returns (DeleteSearchHistoryResponse);
+    // 获取搜索统计
+    rpc GetSearchStats (GetSearchStatsRequest) returns (GetSearchStatsResponse);
+}
+
+// 搜索选项
+message SearchOptions {
+    // 搜索范围
+    repeated SearchScope scopes = 1;
+    // 时间范围
+    TimeRange time_range = 2;
+    // 排序方式
+    SortType sort_type = 3;
+    // 排序顺序
+    SortOrder sort_order = 4;
+    // 分页大小
+    int32 page_size = 5;
+    // 分页标记
+    string page_token = 6;
+    // 高亮选项
+    HighlightOptions highlight = 7;
+    // 过滤选项
+    map<string, string> filters = 8;
+}
+
+// 搜索范围
+enum SearchScope {
+    // 全部
+    ALL = 0;
+    // 私聊消息
+    PRIVATE_MESSAGE = 1;
+    // 群聊消息
+    GROUP_MESSAGE = 2;
+    // 系统消息
+    SYSTEM_MESSAGE = 3;
+    // 文件消息
+    FILE_MESSAGE = 4;
+}
+
+// 时间范围
+message TimeRange {
+    // 开始时间
+    int64 start_time = 1;
+    // 结束时间
+    int64 end_time = 2;
+}
+
+// 排序方式
+enum SortType {
+    // 相关度
+    RELEVANCE = 0;
+    // 时间
+    TIME = 1;
+    // 热度
+    POPULARITY = 2;
+}
+
+// 排序顺序
+enum SortOrder {
+    // 降序
+    DESC = 0;
+    // 升序
+    ASC = 1;
+}
+
+// 高亮选项
+message HighlightOptions {
+    // 是否启用高亮
+    bool enable = 1;
+    // 前缀标记
+    string pre_tag = 2;
+    // 后缀标记
+    string post_tag = 3;
+    // 高亮字段
+    repeated string fields = 4;
+}
+
+// 搜索消息请求
+message SearchMessageRequest {
+    // 用户ID
+    string user_id = 1;
+    // 搜索关键词
+    string keyword = 2;
+    // 会话ID列表
+    repeated string session_ids = 3;
+    // 发送者ID列表
+    repeated string sender_ids = 4;
+    // 消息类型列表
+    repeated api.im.common.ContentType content_types = 5;
+    // 搜索选项
+    SearchOptions options = 6;
+}
+
+// 搜索消息响应
+message SearchMessageResponse {
+    // 消息列表
+    repeated MessageSearchResult messages = 1;
+    // 总数
+    int32 total = 2;
+    // 下一页标记
+    string next_page_token = 3;
+    // 聚合结果
+    map<string, AggregateResult> aggregations = 4;
+    // 错误信息
+    api.im.common.Error error = 5;
+}
+
+// 消息搜索结果
+message MessageSearchResult {
+    // 消息ID
+    string message_id = 1;
+    // 会话ID
+    string session_id = 2;
+    // 发送者ID
+    string sender_id = 3;
+    // 消息内容
+    string content = 4;
+    // 消息类型
+    api.im.common.ContentType content_type = 5;
+    // 发送时间
+    int64 send_time = 6;
+    // 高亮内容
+    map<string, string> highlights = 7;
+    // 相关度分数
+    float score = 8;
+}
+
+// 搜索用户请求
+message SearchUserRequest {
+    // 搜索关键词
+    string keyword = 1;
+    // 搜索字段
+    repeated api.im.common.SearchField search_fields = 2;
+    // 搜索选项
+    SearchOptions options = 3;
+}
+
+// 搜索用户响应
+message SearchUserResponse {
+    // 用户列表
+    repeated UserSearchResult users = 1;
+    // 总数
+    int32 total = 2;
+    // 下一页标记
+    string next_page_token = 3;
+    // 聚合结果
+    map<string, AggregateResult> aggregations = 4;
+    // 错误信息
+    api.im.common.Error error = 5;
+}
+
+// 用户搜索结果
+message UserSearchResult {
+    // 用户ID
+    string user_id = 1;
+    // 用户名
+    string username = 2;
+    // 昵称
+    string nickname = 3;
+    // 头像URL
+    string avatar_url = 4;
+    // 高亮内容
+    map<string, string> highlights = 5;
+    // 相关度分数
+    float score = 6;
+}
+
+// 搜索群组请求
+message SearchGroupRequest {
+    // 搜索关键词
+    string keyword = 1;
+    // 群组类型列表
+    repeated api.im.common.GroupType group_types = 2;
+    // 搜索选项
+    SearchOptions options = 3;
+}
+
+// 搜索群组响应
+message SearchGroupResponse {
+    // 群组列表
+    repeated GroupSearchResult groups = 1;
+    // 总数
+    int32 total = 2;
+    // 下一页标记
+    string next_page_token = 3;
+    // 聚合结果
+    map<string, AggregateResult> aggregations = 4;
+    // 错误信息
+    api.im.common.Error error = 5;
+}
+
+// 群组搜索结果
+message GroupSearchResult {
+    // 群组ID
+    string group_id = 1;
+    // 群组名称
+    string name = 2;
+    // 群组简介
+    string description = 3;
+    // 群组类型
+    api.im.common.GroupType type = 4;
+    // 成员数量
+    int32 member_count = 5;
+    // 高亮内容
+    map<string, string> highlights = 6;
+    // 相关度分数
+    float score = 7;
+}
+
+// 搜索文件请求
+message SearchFileRequest {
+    // 搜索关键词
+    string keyword = 1;
+    // 文件类型列表
+    repeated api.im.business.media.FileType file_types = 2;
+    // 上传者ID列表
+    repeated string uploader_ids = 3;
+    // 搜索选项
+    SearchOptions options = 4;
+}
+
+// 搜索文件响应
+message SearchFileResponse {
+    // 文件列表
+    repeated FileSearchResult files = 1;
+    // 总数
+    int32 total = 2;
+    // 下一页标记
+    string next_page_token = 3;
+    // 聚合结果
+    map<string, AggregateResult> aggregations = 4;
+    // 错误信息
+    api.im.common.Error error = 5;
+}
+
+// 文件搜索结果
+message FileSearchResult {
+    // 文件ID
+    string file_id = 1;
+    // 文件名
+    string name = 2;
+    // 文件类型
+    api.im.business.media.FileType type = 3;
+    // 文件大小
+    int64 size = 4;
+    // 上传者ID
+    string uploader_id = 5;
+    // 上传时间
+    int64 upload_time = 6;
+    // 高亮内容
+    map<string, string> highlights = 7;
+    // 相关度分数
+    float score = 8;
+}
+
+// 全局搜索请求
+message GlobalSearchRequest {
+    // 搜索关键词
+    string keyword = 1;
+    // 搜索选项
+    SearchOptions options = 2;
+}
+
+// 全局搜索响应
+message GlobalSearchResponse {
+    // 消息结果
+    repeated MessageSearchResult messages = 1;
+    // 用户结果
+    repeated UserSearchResult users = 2;
+    // 群组结果
+    repeated GroupSearchResult groups = 3;
+    // 文件结果
+    repeated FileSearchResult files = 4;
+    // 聚合结果
+    map<string, AggregateResult> aggregations = 5;
+    // 错误信息
+    api.im.common.Error error = 6;
+}
+
+// 聚合结果
+message AggregateResult {
+    // 聚合类型
+    string type = 1;
+    // 聚合值
+    map<string, int64> values = 2;
+}
+
+// 获取搜索建议请求
+message GetSearchSuggestionsRequest {
+    // 搜索关键词
+    string keyword = 1;
+    // 搜索范围
+    repeated SearchScope scopes = 2;
+    // 建议数量
+    int32 limit = 3;
+}
+
+// 获取搜索建议响应
+message GetSearchSuggestionsResponse {
+    // 建议列表
+    repeated SearchSuggestion suggestions = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 搜索建议
+message SearchSuggestion {
+    // 建议关键词
+    string keyword = 1;
+    // 建议类型
+    SearchScope type = 2;
+    // 权重分数
+    float weight = 3;
+}
+
+// 获取热门搜索请求
+message GetHotSearchesRequest {
+    // 搜索范围
+    repeated SearchScope scopes = 1;
+    // 返回数量
+    int32 limit = 2;
+}
+
+// 获取热门搜索响应
+message GetHotSearchesResponse {
+    // 热门搜索列表
+    repeated HotSearch hot_searches = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 热门搜索
+message HotSearch {
+    // 关键词
+    string keyword = 1;
+    // 搜索次数
+    int32 count = 2;
+    // 热度值
+    float heat = 3;
+    // 趋势
+    TrendType trend = 4;
+}
+
+// 趋势类型
+enum TrendType {
+    // 上升
+    UP = 0;
+    // 下降
+    DOWN = 1;
+    // 持平
+    FLAT = 2;
+}
+
+// 获取搜索历史请求
+message GetSearchHistoryRequest {
+    // 用户ID
+    string user_id = 1;
+    // 搜索范围
+    repeated SearchScope scopes = 2;
+    // 返回数量
+    int32 limit = 3;
+}
+
+// 获取搜索历史响应
+message GetSearchHistoryResponse {
+    // 搜索历史列表
+    repeated SearchHistory histories = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 搜索历史
+message SearchHistory {
+    // 关键词
+    string keyword = 1;
+    // 搜索范围
+    SearchScope scope = 2;
+    // 搜索时间
+    int64 search_time = 3;
+}
+
+// 删除搜索历史请求
+message DeleteSearchHistoryRequest {
+    // 用户ID
+    string user_id = 1;
+    // 关键词列表
+    repeated string keywords = 2;
+    // 搜索范围
+    repeated SearchScope scopes = 3;
+}
+
+// 删除搜索历史响应
+message DeleteSearchHistoryResponse {
+    // 是否成功
+    bool success = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 获取搜索统计请求
+message GetSearchStatsRequest {
+    // 开始时间
+    int64 start_time = 1;
+    // 结束时间
+    int64 end_time = 2;
+    // 统计维度
+    repeated SearchStatsDimension dimensions = 3;
+}
+
+// 获取搜索统计响应
+message GetSearchStatsResponse {
+    // 统计信息
+    SearchStats stats = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 搜索统计维度
+enum SearchStatsDimension {
+    // 搜索范围维度
+    SCOPE = 0;
+    // 用户维度
+    USER = 1;
+    // 时间维度
+    TIME_DIMENSION = 2;
+    // 关键词维度
+    KEYWORD = 3;
+}
+
+// 搜索统计信息
+message SearchStats {
+    // 总搜索次数
+    int32 total_searches = 1;
+    // 独立用户数
+    int32 unique_users = 2;
+    // 平均搜索时长
+    float avg_search_time = 3;
+    // 各范围搜索次数
+    map<string, int32> scope_counts = 4;
+    // 热门关键词统计
+    map<string, int32> keyword_stats = 5;
+    // 详细统计数据
+    map<string, int64> details = 6;
+} 
