@@ -4,6 +4,7 @@ package api.im.service.router;
 
 import "common/message.proto";
 import "common/error.proto";
+import "common/enums.proto";
 
 option go_package = "github.com/flare/api/im/service.router;router";
 option java_multiple_files = true;
@@ -11,20 +12,32 @@ option java_package = "api.im.service.router";
 
 // 消息路由服务
 service MessageRouter {
-    // 上行消息路由
-    rpc RouteUpstreamMessage (RouteUpstreamRequest) returns (RouteUpstreamResponse);
-    // 下行消息分发
-    rpc DistributeMessage (DistributeMessageRequest) returns (DistributeMessageResponse);
+    // 上行消息路由（网关 -> 业务系统）
+    rpc RouteUpstreamMessages (RouteUpstreamMessagesRequest) returns (RouteUpstreamMessagesResponse);
+    // 下行消息分发（业务系统 -> 用户）
+    rpc DistributeMessages (DistributeMessagesRequest) returns (DistributeMessagesResponse);
     // 消息过滤
-    rpc FilterMessage (FilterMessageRequest) returns (FilterMessageResponse);
+    rpc FilterMessages (FilterMessagesRequest) returns (FilterMessagesResponse);
     // 消息优先级处理
-    rpc HandleMessagePriority (HandleMessagePriorityRequest) returns (HandleMessagePriorityResponse);
-    // 获取消息路由信息
-    rpc GetMessageRoute (GetMessageRouteRequest) returns (GetMessageRouteResponse);
+    rpc HandleMessagesPriority (HandleMessagesPriorityRequest) returns (HandleMessagesPriorityResponse);
 }
 
-// 上行消息路由请求
-message RouteUpstreamRequest {
+// 上行消息路由请求（批量）
+message RouteUpstreamMessagesRequest {
+    // 消息列表
+    repeated RouteUpstreamMessage messages = 1;
+}
+
+// 上行消息路由响应（批量）
+message RouteUpstreamMessagesResponse {
+    // 路由结果列表
+    repeated RouteUpstreamResult results = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 上行消息
+message RouteUpstreamMessage {
     // 消息数据
     api.im.common.MessageData message = 1;
     // 源网关ID
@@ -33,8 +46,8 @@ message RouteUpstreamRequest {
     MessageRoutingOptions options = 3;
 }
 
-// 上行消息路由响应
-message RouteUpstreamResponse {
+// 上行消息路由结果
+message RouteUpstreamResult {
     // 消息ID
     string message_id = 1;
     // 路由结果
@@ -43,8 +56,22 @@ message RouteUpstreamResponse {
     api.im.common.Error error = 3;
 }
 
-// 下行消息分发请求
-message DistributeMessageRequest {
+// 下行消息分发请求（批量）
+message DistributeMessagesRequest {
+    // 消息列表
+    repeated DistributeMessage messages = 1;
+}
+
+// 下行消息分发响应（批量）
+message DistributeMessagesResponse {
+    // 分发结果列表
+    repeated DistributeResult results = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 下行消息
+message DistributeMessage {
     // 消息数据
     api.im.common.MessageData message = 1;
     // 目标网关列表
@@ -53,76 +80,97 @@ message DistributeMessageRequest {
     MessageDistributionOptions options = 3;
 }
 
-// 下行消息分发响应
-message DistributeMessageResponse {
+// 下行消息分发结果
+message DistributeResult {
+    // 消息ID
+    string message_id = 1;
     // 分发结果
-    map<string, bool> distribution_results = 1;
+    map<string, bool> distribution_results = 2;
+    // 错误信息
+    api.im.common.Error error = 3;
+}
+
+// 消息过滤请求（批量）
+message FilterMessagesRequest {
+    // 消息列表
+    repeated FilterMessage messages = 1;
+}
+
+// 消息过滤响应（批量）
+message FilterMessagesResponse {
+    // 过滤结果列表
+    repeated FilterResult results = 1;
     // 错误信息
     api.im.common.Error error = 2;
 }
 
-// 消息过滤请求
-message FilterMessageRequest {
+// 过滤消息
+message FilterMessage {
     // 消息数据
     api.im.common.MessageData message = 1;
     // 过滤规则
     repeated string filter_rules = 2;
 }
 
-// 消息过滤响应
-message FilterMessageResponse {
+// 过滤结果
+message FilterResult {
+    // 消息ID
+    string message_id = 1;
     // 是否通过过滤
-    bool passed = 1;
+    bool passed = 2;
     // 过滤结果
-    map<string, bool> filter_results = 2;
+    map<string, bool> filter_results = 3;
     // 错误信息
-    api.im.common.Error error = 3;
+    api.im.common.Error error = 4;
 }
 
-// 消息优先级处理请求
-message HandleMessagePriorityRequest {
+// 消息优先级处理请求（批量）
+message HandleMessagesPriorityRequest {
+    // 消息列表
+    repeated PriorityMessage messages = 1;
+}
+
+// 消息优先级处理响应（批量）
+message HandleMessagesPriorityResponse {
+    // 处理结果列表
+    repeated PriorityResult results = 1;
+    // 错误信息
+    api.im.common.Error error = 2;
+}
+
+// 优先级消息
+message PriorityMessage {
     // 消息数据
     api.im.common.MessageData message = 1;
     // 优先级规则
     PriorityRules priority_rules = 2;
 }
 
-// 消息优先级处理响应
-message HandleMessagePriorityResponse {
+// 优先级处理结果
+message PriorityResult {
+    // 消息ID
+    string message_id = 1;
     // 处理后的优先级
-    int32 priority = 1;
+    int32 priority = 2;
     // 错误信息
-    api.im.common.Error error = 2;
+    api.im.common.Error error = 3;
 }
 
-// 获取消息路由请求
-message GetMessageRouteRequest {
-    // 用户ID
-    string user_id = 1;
-    // 设备ID列表
-    repeated string device_ids = 2;
-}
-
-// 获取消息路由响应
-message GetMessageRouteResponse {
-    // 路由信息
-    repeated RouteInfo routes = 1;
-    // 错误信息
-    api.im.common.Error error = 2;
-}
 
 // 消息路由选项
 message MessageRoutingOptions {
     // 优先级
-    int32 priority = 1;
+    api.im.common.MessagePriority priority = 1;
+    // QoS级别
+    api.im.common.QosLevel qos_level = 2;
     // 是否需要存储
-    bool need_store = 2;
+    bool need_store = 3;
     // 是否需要过滤
-    bool need_filter = 3;
+    bool need_filter = 4;
     // 超时时间（毫秒）
-    int32 timeout_ms = 4;
+    int32 timeout_ms = 5;
     // 扩展选项
-    map<string, string> extra_options = 5;
+    map<string, string> extra_options = 6;
 }
 
 // 消息分发选项
@@ -148,17 +196,3 @@ message PriorityRules {
     // 消息类型优先级
     map<int32, int32> message_type_priorities = 3;
 }
-
-// 路由信息
-message RouteInfo {
-    // 网关ID
-    string gateway_id = 1;
-    // 用户ID
-    string user_id = 2;
-    // 设备ID
-    string device_id = 3;
-    // 设备类型
-    string platform = 4;
-    // 路由权重
-    int32 weight = 5;
-} 

@@ -6,177 +6,205 @@ option go_package = "github.com/flare/api/im/common;common";
 option java_multiple_files = true;
 option java_package = "api.im.common";
 
-//@类型
-enum AtType{
-	None=0;//无
-	AtAll=1;//@所有人
-	AtYou=2;//@你
-	AtUser=3;//@用户
-}
-//会话类型
-enum SessionType{
-	Single=0;//单聊
-	Group=1;//群聊
-	WorkGroup=2;//工作群
-	SuperGroup=3;//超级群
-	System=4;//系统
-}
-//消息类型
-enum ContentType{
-	Text=0;//文本
-	Card=1;//名片
-	Image=2;//图片
-	Voice=3;//语音
-	Video=4;//视频
-	File=5;//文件
-	Location=6;//位置
-	CustomContent=7;//自定义
-	NotificationMsg=8;//通知
-	Tips=9;//提示
-	At=10;//@
-	Reply=11;//回复
-	Quote=12;//引用
-	Merge=13;//合并
-	Forward=14;//转发
-	RedEnvelope=15;//红包
-}
-//消息状态
-enum MsgStatus{
-	Create=0;//无
-	Sending=1;//发送中
-	Sent=2;//已发送
-	Failed=3;//发送失败
-	Read=4;//已读
-	Revoked=5;//已撤回
-	Delivered=6;//已投递
-}
-//平台类型
-enum Platform{
-	Unknown=0;//未知
-	iOS=1;//iOS
-	Android=2;//安卓
-	Web=3;//网页
-	Windows=4;//Windows
-	MacOS=5;//MacOS
-	Linux=6;//Linux
-	Server=7;//服务器
-}
-//性别类型
-enum Gender{
-	Unspecified=0;//未指定
-	Male=1;//男
-	Female=2;//女
-	Other=3;//其他
-}
-//隐私规则
-enum PrivacyRule{
-	Everyone=0;//所有人
-	Contacts=1;//仅联系人
-	Nobody=2;//任何人都不可以
-	CustomRule=3;//自定义
-}
-//搜索字段
-enum SearchField{
-	All=0;//全部字段
-	Username=1;//用户名
-	Nickname=2;//昵称
-	Phone=3;//手机号
-	Email=4;//邮箱
-	Bio=5;//个人简介
-}
-//好友来源
-enum FriendSource{
-	Search=0;//搜索
-	QRCode=1;//二维码
-	GroupChat=2;//群聊
-	FriendCard=3;//名片
-	PhoneContact=4;//手机通讯录
-	Nearby=5;//附近的人
-	Recommend=6;//推荐
-	OtherSource=7;//其他
-}
-//好友请求状态
-enum FriendRequestStatus{
-	Pending=0;//待处理
-	Accepted=1;//已接受
-	Rejected=2;//已拒绝
-	Ignored=3;//已忽略
-	Expired=4;//已过期
-	Canceled=5;//已取消
+// =============== 消息相关枚举 ===============
+
+// 消息类型
+enum ContentType {
+    Text = 0;           // 文本消息
+    Card = 1;           // 名片消息
+    Image = 2;          // 图片消息
+    Voice = 3;          // 语音消息
+    Video = 4;          // 视频消息
+    File = 5;           // 文件消息
+    Location = 6;       // 位置消息
+    CustomContent = 7;  // 自定义消息
+    NotificationMsg = 8;// 通知消息
+    Tips = 9;           // 提示消息
+    At = 10;            // @消息
+    Reply = 11;         // 回复消息
+    Quote = 12;         // 引用消息
+    Merge = 13;         // 合并消息
+    Forward = 14;       // 转发消息
+    RedEnvelope = 15;   // 红包消息
 }
 
-
-// 在线状态
-enum OnlineStatus {
-    // 未知状态
-    ONLINE_STATUS_UNKNOWN = 0;
-    // 在线
-    ONLINE_STATUS_ONLINE = 1;
-    // 离线
-    ONLINE_STATUS_OFFLINE = 2;
-    // 忙碌
-    ONLINE_STATUS_BUSY = 3;
-    // 离开
-    ONLINE_STATUS_AWAY = 4;
-    // 隐身
-    ONLINE_STATUS_INVISIBLE = 5;
+// 消息状态
+enum MsgStatus {
+    Create = 0;     // 消息创建
+    Sending = 1;    // 发送中
+    Sent = 2;       // 已发送
+    Failed = 3;     // 发送失败
+    Read = 4;       // 已读
+    Revoked = 5;    // 已撤回
+    Delivered = 6;  // 已投递
 }
+
+// 消息优先级
+enum MessagePriority {
+    MSG_PRIORITY_LOW = 0;     // 低优先级
+    MSG_PRIORITY_NORMAL = 1;  // 普通优先级
+    MSG_PRIORITY_HIGH = 2;    // 高优先级
+    MSG_PRIORITY_URGENT = 3;  // 紧急优先级
+}
+
+// 消息QoS级别
+enum QosLevel {
+    QOS_LEVEL_AT_MOST_ONCE = 0;    // 最多一次
+    QOS_LEVEL_AT_LEAST_ONCE = 1;   // 至少一次
+    QOS_LEVEL_EXACTLY_ONCE = 2;    // 仅一次
+}
+
+// @消息类型
+enum AtType {
+    None = 0;    // 无@
+    AtAll = 1;   // @所有人
+    AtYou = 2;   // @你
+    AtUser = 3;  // @指定用户
+}
+
+// =============== 会话相关枚举 ===============
+
+// 会话类型
+enum SessionType {
+    Single = 0;      // 单聊
+    Group = 1;       // 群聊
+    WorkGroup = 2;   // 工作群
+    SuperGroup = 3;  // 超级群
+    System = 4;      // 系统消息
+}
+
 // 群组类型
 enum GroupType {
-    NORMAL = 0;
-    SUPER = 1;
-    CHANNEL = 2;
+    GROUP_TYPE_NORMAL = 0;   // 普通群组
+    GROUP_TYPE_SUPER = 1;    // 超级群组
+    GROUP_TYPE_CHANNEL = 2;  // 频道
 }
 
 // 成员角色
 enum MemberRole {
-    MEMBER = 0;
-    ADMIN = 1;
-    OWNER = 2;
+    MEMBER_ROLE_MEMBER = 0;  // 普通成员
+    MEMBER_ROLE_ADMIN = 1;   // 管理员
+    MEMBER_ROLE_OWNER = 2;   // 群主
+}
+
+// =============== 用户相关枚举 ===============
+
+// 平台类型
+enum Platform {
+    Unknown = 0;   // 未知平台
+    iOS = 1;       // iOS
+    Android = 2;   // 安卓
+    Web = 3;       // 网页
+    Windows = 4;   // Windows
+    MacOS = 5;     // MacOS
+    Linux = 6;     // Linux
+    Server = 7;    // 服务器
+}
+
+// 性别类型
+enum Gender {
+    Unspecified = 0;  // 未指定
+    Male = 1;         // 男
+    Female = 2;       // 女
+    Other = 3;        // 其他
+}
+
+// 隐私规则
+enum PrivacyRule {
+    Everyone = 0;     // 所有人可见
+    Contacts = 1;     // 仅联系人可见
+    Nobody = 2;       // 任何人不可见
+    CustomRule = 3;   // 自定义规则
+}
+
+// =============== 好友相关枚举 ===============
+
+// 好友来源
+enum FriendSource {
+    Search = 0;         // 搜索添加
+    QRCode = 1;         // 扫码添加
+    GroupChat = 2;      // 群聊添加
+    FriendCard = 3;     // 名片添加
+    PhoneContact = 4;   // 手机通讯录
+    Nearby = 5;         // 附近的人
+    Recommend = 6;      // 推荐添加
+    OtherSource = 7;    // 其他来源
+}
+
+// 好友请求状态
+enum FriendRequestStatus {
+    Pending = 0;    // 待处理
+    Accepted = 1;   // 已接受
+    Rejected = 2;   // 已拒绝
+    Ignored = 3;    // 已忽略
+    Expired = 4;    // 已过期
+    Canceled = 5;   // 已取消
 }
 
 // 好友关系状态
 enum FriendStatus {
-    STRANGER = 0;
-    REQUESTING = 1;
-    REQUESTED = 2;
-    FRIEND = 3;
-    BLOCKED = 4;
+    FRIEND_STATUS_STRANGER = 0;      // 陌生人
+    FRIEND_STATUS_REQUESTING = 1;    // 请求中
+    FRIEND_STATUS_REQUESTED = 2;     // 被请求
+    FRIEND_STATUS_FRIEND = 3;        // 好友
+    FRIEND_STATUS_BLOCKED = 4;       // 已拉黑
 }
 
-// 通知类型
-enum NotificationType {
-    SYSTEM = 0;
-    FRIEND_REQUEST = 1;
-    GROUP_INVITATION = 2;
-    GROUP_APPLICATION = 3;
-    MESSAGE_RECALL = 4;
-    MESSAGE_REACTION = 5;
+// =============== 系统状态枚举 ===============
+
+// 在线状态
+enum OnlineStatus {
+    ONLINE_STATUS_UNKNOWN = 0;    // 未知状态
+    ONLINE_STATUS_ONLINE = 1;     // 在线
+    ONLINE_STATUS_OFFLINE = 2;    // 离线
+    ONLINE_STATUS_BUSY = 3;       // 忙碌
+    ONLINE_STATUS_AWAY = 4;       // 离开
+    ONLINE_STATUS_INVISIBLE = 5;  // 隐身
 }
 
 // 同步类型
 enum SyncType {
-    SYNC_TYPE_UNSPECIFIED = 0;
-    SYNC_TYPE_INCREMENTAL = 1;
-    SYNC_TYPE_FULL = 2;
-    SYNC_TYPE_QUICK = 3;
+    SYNC_TYPE_UNSPECIFIED = 0;  // 未指定
+    SYNC_TYPE_INCREMENTAL = 1;  // 增量同步
+    SYNC_TYPE_FULL = 2;         // 全量同步
+    SYNC_TYPE_QUICK = 3;        // 快速同步
 }
 
 // 操作类型
 enum OperationType {
-    OPERATION_TYPE_UNSPECIFIED = 0;
-    OPERATION_TYPE_RECALL = 1;
-    OPERATION_TYPE_DELETE = 2;
-    OPERATION_TYPE_EDIT = 3;
-    OPERATION_TYPE_PIN = 4;
-    OPERATION_TYPE_UNPIN = 5;
+    OPERATION_TYPE_UNSPECIFIED = 0;  // 未指定
+    OPERATION_TYPE_RECALL = 1;       // 撤回
+    OPERATION_TYPE_DELETE = 2;       // 删除
+    OPERATION_TYPE_EDIT = 3;         // 编辑
+    OPERATION_TYPE_PIN = 4;          // 置顶
+    OPERATION_TYPE_UNPIN = 5;        // 取消置顶
 }
 
 // 状态类型
 enum StatusType {
-    STATUS_TYPE_UNSPECIFIED = 0;
-    STATUS_TYPE_DELIVERY = 1;
-    STATUS_TYPE_READ = 2;
-    STATUS_TYPE_ONLINE = 3;
-    STATUS_TYPE_TYPING = 4;
+    STATUS_TYPE_UNSPECIFIED = 0;  // 未指定
+    STATUS_TYPE_DELIVERY = 1;     // 送达状态
+    STATUS_TYPE_READ = 2;         // 已读状态
+    STATUS_TYPE_ONLINE = 3;       // 在线状态
+    STATUS_TYPE_TYPING = 4;       // 输入状态
+}
+
+// 通知类型
+enum NotificationType {
+    NOTIFICATION_TYPE_SYSTEM = 0;           // 系统通知
+    NOTIFICATION_TYPE_FRIEND_REQUEST = 1;   // 好友请求
+    NOTIFICATION_TYPE_GROUP_INVITATION = 2; // 群组邀请
+    NOTIFICATION_TYPE_GROUP_APPLICATION = 3;// 群组申请
+    NOTIFICATION_TYPE_MESSAGE_RECALL = 4;   // 消息撤回
+    NOTIFICATION_TYPE_MESSAGE_REACTION = 5; // 消息反应
+}
+
+// 搜索字段
+enum SearchField {
+    All = 0;       // 全部字段
+    Username = 1;  // 用户名
+    Nickname = 2;  // 昵称
+    Phone = 3;     // 手机号
+    Email = 4;     // 邮箱
+    Bio = 5;       // 个人简介
 }

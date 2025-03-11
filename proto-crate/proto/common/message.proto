@@ -13,8 +13,8 @@ message MessageData{
     bytes content = 3;
     uint64 send_time = 4;
     string group_id = 5;
-    int64 client_msg_id = 6;
-    int64 server_msg_id = 7;
+    string client_msg_id = 6;
+    string server_msg_id = 7;
     int32  send_platform_id = 8;
     string send_nickname = 9;
     string send_face_url = 10;
@@ -24,7 +24,7 @@ message MessageData{
     int64 seq = 14;
     uint64 create_time = 15;
     int32 status = 16;
-    map<string, bool> options = 17;
+    map<string, string> options = 17;
     OfflinePushInfo offline_push_info = 18;
     repeated string at_user_list = 19;
 }

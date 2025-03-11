@@ -1,92 +1,99 @@
-use crate::domain::{
-    entities::message::{Message, MessagePriority, QosLevel},
-    repositories::message_repository::MessageRepository,
-    services::routing_service::{RoutingService, RouteInfo, DistributionResult},
+use crate::{
+    domain::{
+        entities::{Message, MessageStatus},
+        services::MessageService,
+    },
 };
+use std::sync::Arc;
+use anyhow::Result;
+use log::{info, error, warn};
+use std::collections::HashMap;
 
-pub struct MessageRouterService<R: MessageRepository, S: RoutingService> {
-    message_repository: R,
-    routing_service: S,
+pub struct MessageRouterService {
+    message_service: Arc<dyn MessageService>,
 }
 
-impl<R: MessageRepository, S: RoutingService> MessageRouterService<R, S> {
-    pub fn new(message_repository: R, routing_service: S) -> Self {
+impl MessageRouterService {
+    pub fn new(
+        message_service: Arc<dyn MessageService>,
+    ) -> Self {
         Self {
-            message_repository,
-            routing_service,
+            message_service,
         }
     }
 
-    // 处理上行消息
-    pub async fn handle_upstream_message(&self, message: Message) -> Result<(), Error> {
-        // 1. 验证消息
-        self.validate_message(&message)?;
+    /// 消息预处理和校验
+    pub async fn pre_process(&self, message: &Message) -> Result<i32> {
+        // 1. 基础格式校验
+        let pre_process_code = self.message_service.pre_process(message).await?;
+        Ok(pre_process_code as i32)
+    }
 
-        // 2. 根据 QoS 级别处理
-        match message.metadata.qos_level {
-            QosLevel::AtMostOnce => {
-                self.routing_service.route_upstream(message).await?;
-            }
-            QosLevel::AtLeastOnce | QosLevel::ExactlyOnce => {
-                // 先存储后路由
-                self.message_repository.save(message.clone()).await?;
-                self.routing_service.route_upstream(message).await?;
-            }
+    /// 消息路由处理
+    pub async fn route_message(&self, message: &Message) -> Result<(bool, Option<String>, Vec<String>)> {
+        // 1. 先存储消息
+        if let Err(e) = self.message_service.handle_message_storage(message).await {
+            error!("Failed to store message {}: {}", message.server_msg_id, e);
+            return Ok((false, Some(e.to_string()), vec![]));
+        }
+        
+        // 2. 下发消息
+        if let Err(e) = self.message_service.handle_message_distribution(message).await {
+            error!("Failed to route message {}: {}", message.server_msg_id, e);
+            return Ok((false, Some(e.to_string()), vec![]));
+        }
+
+        // 3. 下发成功，处理消息同步
+        if let Err(e) = self.message_service.handle_message_sync(message).await {
+            warn!("Failed to sync message {}: {}", message.server_msg_id, e);
+        }
+
+        Ok((true, None, vec![]))
+    }
+
+    /// 消息重试处理
+    pub async fn retry_message(&self, message: &Message) -> Result<()> {
+        // 1. 检查是否需要重试
+        if message.status == MessageStatus::Failed as i32 {
+            self.message_service.handle_message_retry(message).await?;
         }
 
         Ok(())
     }
 
-    // 处理下行消息
-    pub async fn handle_downstream_message(&self, message: Message) -> Result<Vec<DistributionResult>, Error> {
-        // 1. 获取路由信息
-        let route_info = self.routing_service.get_route_info(&message.session_id).await?;
+    /// 批量消息处理
+    pub async fn process_messages(&self, messages: Vec<Message>) -> Result<HashMap<String, (bool, Option<String>, Vec<String>)>> {
+        let mut results = HashMap::new();
 
-        // 2. 根据优先级处理
-        match message.metadata.priority {
-            MessagePriority::High => {
-                // 高优先级消息直接分发
-                self.routing_service.distribute_downstream(message).await?
+        for message in messages {
+            // 1. 预处理
+            let pre_process_code = self.pre_process(&message).await?;
+            if pre_process_code != 0 { // 0 表示 Ok
+                results.insert(message.server_msg_id.clone(), (
+                    false,
+                    Some(format!("Pre-process failed with code: {}", pre_process_code)),
+                    vec![],
+                ));
+                continue;
             }
-            MessagePriority::Normal | MessagePriority::Low => {
-                // 普通和低优先级消息先存储
-                self.message_repository.save(message.clone()).await?;
-                self.routing_service.distribute_downstream(message).await?
+
+            // 2. 路由处理
+            match self.route_message(&message).await {
+                Ok(result) => {
+                    results.insert(message.server_msg_id.clone(), result);
+                }
+                Err(e) => {
+                    error!("Failed to route message {}: {}", message.server_msg_id, e);
+                    results.insert(message.server_msg_id.clone(), (
+                        false,
+                        Some(e.to_string()),
+                        vec![],
+                    ));
+                }
             }
-        };
-
-        Ok(vec![])
-    }
-
-    // 更新路由表
-    pub async fn update_route_table(&self, route_info: RouteInfo) -> Result<(), Error> {
-        self.routing_service.update_route_table(route_info).await?;
-        Ok(())
-    }
-
-    // 验证消息
-    fn validate_message(&self, message: &Message) -> Result<(), Error> {
-        if message.session_id.is_empty() {
-            return Err(Error::ValidationError("Session ID is required".to_string()));
         }
-        if message.sender_id.is_empty() {
-            return Err(Error::ValidationError("Sender ID is required".to_string()));
-        }
-        if message.content.is_empty() {
-            return Err(Error::ValidationError("Message content is required".to_string()));
-        }
-        Ok(())
+
+        Ok(results)
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error("Repository error: {0}")]
-    Repository(#[from] crate::domain::repositories::message_repository::Error),
-    
-    #[error("Routing error: {0}")]
-    Routing(#[from] crate::domain::services::routing_service::Error),
-    
-    #[error("Validation error: {0}")]
-    ValidationError(String),
-} 
