@@ -1,5 +1,5 @@
 use crate::domain::{
-    entities::{Message, MessageStatus},
+    entities::MessageStatus,
     repositories::{
         MessageRepository, RouteRepository, FriendRepository, GroupRepository,
         ContentFilterRepository,
@@ -9,6 +9,8 @@ use async_trait::async_trait;
 use std::sync::Arc;
 use anyhow::Result;
 use log::{info, error, warn};
+use common::utils::msg_utils::is_group_message;
+use proto_crate::api::im::common::MessageData;
 use crate::domain::repositories::GroupMemberQuery;
 use crate::entities::{MessageProcessResult, PreProcessCode};
 use crate::services::MessageService;
@@ -41,7 +43,7 @@ impl MessageServiceImpl {
     }
 
     /// 检查是否需要离线推送
-    fn need_offline_push(&self, message: &Message) -> bool {
+    fn need_offline_push(&self, message: &MessageData) -> bool {
         // 检查消息配置
         message.options.get("need_offline_push")
             .map(|v| v == "true")
@@ -49,14 +51,14 @@ impl MessageServiceImpl {
     }
 
     /// 检查消息是否需要重试
-    fn need_retry(&self, message: &Message) -> bool {
+    fn need_retry(&self, message: &MessageData) -> bool {
         message.options.get("need_retry")
             .map(|v| v == "true")
             .unwrap_or(true) // 默认开启重试
     }
 
     /// 检查消息格式
-    fn check_message_format(&self, message: &Message) -> bool {
+    fn check_message_format(&self, message: &MessageData) -> bool {
         // 检查必要字段
         if message.server_msg_id.is_empty() || message.send_id.is_empty() {
             return false;
@@ -69,7 +71,7 @@ impl MessageServiceImpl {
 
         true
     }
-    async fn check_content_security(&self, message: &Message) -> Result<bool> {
+    async fn check_content_security(&self, message: &MessageData) -> Result<bool> {
         // 1. 检查文本内容
         let text_result = self.content_filter_repository
             .check(message)
@@ -87,8 +89,8 @@ impl MessageServiceImpl {
         Ok(true)
     }
 
-    async fn check_permission(&self, message: &Message) -> Result<PreProcessCode> {
-        if message.is_group_message() {
+    async fn check_permission(&self, message: &MessageData) -> Result<PreProcessCode> {
+        if is_group_message(message){
             // 检查群成员权限
             let member_status = self.group_repository
                 .check_member_status(&message.group_id, &message.send_id)
@@ -120,7 +122,7 @@ impl MessageServiceImpl {
         Ok(PreProcessCode::Ok)
     }
 
-    async fn check_business_rules(&self, message: &Message) -> Result<PreProcessCode> {
+    async fn check_business_rules(&self, message: &MessageData) -> Result<PreProcessCode> {
         // 1. 检查消息频率限制
         if let Some(limit) = message.options.get("rate_limit") {
             let rate_limit = limit.parse::<i32>().unwrap_or(10); // 默认每分钟10条
@@ -148,7 +150,7 @@ impl MessageServiceImpl {
         }
 
         // 4. 检查会话消息数量限制
-        if message.is_group_message() {
+        if is_group_message(message) {
             // 群聊消息限制
             let daily_limit = message.options.get("group_daily_limit")
                 .and_then(|v| v.parse::<i32>().ok())
@@ -216,7 +218,7 @@ impl MessageServiceImpl {
 
 #[async_trait]
 impl MessageService for MessageServiceImpl {
-    async fn pre_process(&self, message: &Message) -> Result<PreProcessCode> {
+    async fn pre_process(&self, message: &MessageData) -> Result<PreProcessCode> {
         // 1. 基础格式校验
         if !self.check_message_format(message) {
             return Ok(PreProcessCode::InvalidFormat);
@@ -237,7 +239,7 @@ impl MessageService for MessageServiceImpl {
     }
 
 
-    async fn handle_private_message(&self, message: &Message) -> Result<MessageProcessResult> {
+    async fn handle_message(&self, message: &MessageData) -> Result<MessageProcessResult> {
         // 1. 获取接收方路由信息
         let routes = self.route_repository.get_routes_with_weight(&message.recv_id).await?;
         
@@ -257,13 +259,13 @@ impl MessageService for MessageServiceImpl {
         // 3. 构建处理结果
         Ok(MessageProcessResult {
             message_id: message.server_msg_id.clone(),
-            success: !routes.is_empty(),
+            success: true,
             error: error_msg,
             routes: routes.into_iter().map(|r| r.address).collect(),
         })
     }
 
-    async fn handle_group_message(&self, message: &Message) -> Result<MessageProcessResult> {
+    async fn handle_group_message(&self, message: &MessageData) -> Result<MessageProcessResult> {
         const BATCH_SIZE: i32 = 1000; // 每批处理1000个成员
         
         // 1. 获取群成员总数
@@ -367,16 +369,16 @@ impl MessageService for MessageServiceImpl {
         })
     }
 
-    async fn handle_message_distribution(&self, message: &Message) -> Result<()> {
+    async fn handle_message_distribution(&self, message: &MessageData) -> Result<()> {
         self.message_repository.handle_message_distribution(message).await
     }
 
-    async fn handle_message_storage(&self, message: &Message) -> Result<()> {
+    async fn handle_message_storage(&self, message: &MessageData) -> Result<()> {
         // 1. 消息持久化
         self.message_repository.save_message(message).await?;
 
         // 3. 更新会话最新消息
-        if message.is_group_message() {
+        if is_group_message(message) {
             self.group_repository
                 .update_last_message(&message.group_id, message)
                 .await?;
@@ -386,7 +388,7 @@ impl MessageService for MessageServiceImpl {
     }
 
 
-    async fn handle_message_sync(&self, message: &Message) -> Result<()> {
+    async fn handle_message_sync(&self, message: &MessageData) -> Result<()> {
         // 1. 获取用户的其他在线设备
         let other_routes = self.route_repository
             .get_routes_with_weight(&message.recv_id)
@@ -443,7 +445,7 @@ impl MessageService for MessageServiceImpl {
     /// - 记录重试次数超限的错误日志
     /// - 记录重试调度的信息日志
     /// - 记录保存失败的错误日志
-    async fn handle_message_retry(&self, message: &Message) -> Result<()> {
+    async fn handle_message_retry(&self, message: &MessageData) -> Result<()> {
         // 检查消息是否需要重试
         if !self.need_retry(message) {
             return Ok(());
@@ -458,7 +460,7 @@ impl MessageService for MessageServiceImpl {
             .and_then(|v| v.parse::<i32>().ok())
             .unwrap_or(3);
 
-        // 如果超过最大重试次数，将消息标记为失败
+        // 如果超过最大重试次数，将消息标记为失败并存入死信队列
         if retry_count >= max_retries {
             error!(
                 "Message {} exceeded max retry count: {}/{}",
@@ -470,11 +472,21 @@ impl MessageService for MessageServiceImpl {
                 .update_message_status(&message.server_msg_id, MessageStatus::Failed)
                 .await?;
             
+            // 保存到死信队列
+            let error_msg = format!(
+                "Message processing failed after {} retries. Last retry at: {}", 
+                retry_count,
+                message.options.get("last_retry_time").unwrap_or(&"unknown".to_string())
+            );
+            
+            self.message_repository
+                .save_to_dead_letter(message, error_msg, retry_count)
+                .await?;
+            
             return Ok(());
         }
 
         // 2. 计算指数退避时间
-        // 基础延迟时间默认为1秒，每次重试间隔翻倍
         let base_delay = message.options.get("base_delay")
             .and_then(|v| v.parse::<i64>().ok())
             .unwrap_or(1000); // 默认1秒
@@ -494,24 +506,18 @@ impl MessageService for MessageServiceImpl {
         retry_message.options = options;
 
         // 4. 保存更新后的消息
-        match self.message_repository.save_message(&retry_message).await {
-            Ok(_) => {
-                info!(
-                    "Message {} scheduled for retry {}/{} at {}",
-                    message.server_msg_id,
-                    retry_count + 1,
-                    max_retries,
-                    next_retry_time
-                );
-                Ok(())
-            }
-            Err(e) => {
-                error!(
-                    "Failed to save retry message {}: {}",
-                    message.server_msg_id, e
-                );
-                Err(e)
-            }
-        }
+        self.message_repository.save_message(&retry_message).await?;
+
+        // 5. 重新分发消息
+        info!(
+            "Retrying message {} ({}/{})",
+            message.server_msg_id,
+            retry_count + 1,
+            max_retries
+        );
+
+        // 根据消息类型选择不同的处理方式
+       self.message_repository.handle_message_distribution(&retry_message).await?;
+        Ok(())
     }
 }

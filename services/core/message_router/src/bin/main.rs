@@ -1,85 +1,97 @@
 use anyhow::Result;
-use flare_core::logs::Logger;
+use flare_core::logs::{LogConfig, Logger};
 use log::{info, error};
-use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
-use notification::{
-    infrastructure::{
-        services::notification_service_impl::NotificationServiceImpl,
-        repositories::postgres_repository::PostgresRepository,
-        providers::{
-            jpush_provider::JPushProvider,
-            getui_provider::GetuiProvider,
-            huawei_provider::HuaweiProvider,
-        },
-    },
-    interfaces::grpc::notification_service::NotificationGrpcService,
-};
-use proto_crate::api::im::service::notification::notification_server::NotificationServer;
 use flare_rpc_core::{
     discover::consul::{ConsulConfig, ConsulRegistry},
     AppBuilder,
 };
 use std::time::Duration;
 use tonic::transport::Server;
+use message_router::{
+    domain::services::{MessageService, MessageServiceImpl},
+    application::message_router::MessageRouterService,
+    infrastructure::repositories::{
+        MessageRepositoryImpl,
+        RouteRepositoryImpl,
+        FriendRepositoryImpl,
+        GroupRepositoryImpl,
+        ContentFilterRepositoryImpl,
+    },
+    interfaces::{
+        grpc::message_router_service::MessageRouterGrpcService,
+        consumers::MessageDistributionConsumer,
+    },
+};
+use proto_crate::api::im::service::router::message_router_server::MessageRouterServer;
+use std::error::Error;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // 初始化日志
-    Logger::init("notification", "debug")?;
-    info!("Starting Notification Service...");
+    Logger::init(Some(LogConfig::default()))?;
 
+    info!("Starting Message Router Service...");
 
-    // 创建 gRPC 服务
-    let grpc_service = NotificationGrpcService::new(notification_service);
+    // 初始化消息服务
+    let message_service = init_message_service()?;
+    let message_router_service = Arc::new(MessageRouterService::new(message_service.clone()));
+    let grpc_service = MessageRouterGrpcService::new(message_router_service);
 
-    // 配置 Consul
-    let consul_host = std::env::var("CONSUL_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
-    let consul_port = std::env::var("CONSUL_PORT")
-        .unwrap_or_else(|_| "8500".to_string())
-        .parse::<u16>()?;
-    let consul_addr = format!("{}:{}", consul_host, consul_port).parse()?;
-    
+    // 初始化并启动 Kafka 消费者
+    let consumer = MessageDistributionConsumer::new(message_service)?;
+    tokio::spawn(async move {
+        if let Err(e) = consumer.start().await {
+            error!("Kafka consumer error: {}", e);
+        }
+    });
+
+    // 启动 gRPC 服务
+    let addr = get_service_addr()?;
     let consul_config = ConsulConfig {
-        addr: consul_addr,
+        addr: "127.0.0.1:8500".parse()?,
         timeout: Duration::from_secs(3),
         protocol: "http".to_string(),
         token: None,
     };
+    // 创建 Consul 注册器
+    let registry = ConsulRegistry::new(consul_config, Duration::from_secs(5)).await?;
 
-    // 创建服务注册器
-    let registry = ConsulRegistry::new(
-        consul_config,
-        Duration::from_secs(30), // 注册间隔
-    ).await?;
 
-    // 配置服务
-    let service_host = std::env::var("SERVICE_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
-    let service_port = std::env::var("SERVICE_PORT")
-        .unwrap_or_else(|_| "50055".to_string())
-        .parse::<u16>()?;
-    let addr = format!("{}:{}", service_host, service_port).parse()?;
-
-    // 创建应用构建器
-    let app = AppBuilder::new("notification")
-        .version("1.0.0")
+    let app = AppBuilder::new("message_router")
         .weight(1)
-        .tag("prod")
-        .meta("type", "notification")
         .register(registry)
         .build();
 
-    info!("Notification Service listening on {}", addr);
+    info!("Message Router Service listening on {}", addr);
 
-    // 运行服务
-    app.run(service_host.as_str(), service_port, |mut server, addr| async move {
+    app.run("127.0.0.1", 50052, |mut server, addr| async move {
         server
-            .add_service(NotificationServer::new(grpc_service))
+            .add_service(MessageRouterServer::new(grpc_service))
             .serve(addr)
             .await
             .map_err(|e| e.into())
-    })
-    .await?;
+    }).await.expect("server start filed");
 
     Ok(())
-} 
+}
+
+fn init_message_service() -> Result<Arc<MessageServiceImpl>> {
+    let message_repo = Arc::new(MessageRepositoryImpl::new()?);
+    let route_repo = Arc::new(RouteRepositoryImpl::new());
+    let friend_repo = Arc::new(FriendRepositoryImpl::new());
+    let group_repo = Arc::new(GroupRepositoryImpl::new());
+    let content_filter_repo = Arc::new(ContentFilterRepositoryImpl::new());
+
+    Ok(Arc::new(MessageServiceImpl::new(
+        message_repo,
+        route_repo,
+        friend_repo,
+        group_repo,
+        content_filter_repo,
+    )))
+}
+
+fn get_service_addr() -> Result<String> {
+    Ok("127.0.0.1:50052".to_string())
+}

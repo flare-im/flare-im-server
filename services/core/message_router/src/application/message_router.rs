@@ -1,13 +1,12 @@
-use crate::{
-    domain::{
-        entities::{Message, MessageStatus},
-        services::MessageService,
-    },
+use crate::domain::{
+    entities::MessageStatus,
+    services::MessageService,
 };
-use std::sync::Arc;
 use anyhow::Result;
-use log::{info, error, warn};
+use log::{error, info, warn};
+use proto_crate::api::im::common::MessageData;
 use std::collections::HashMap;
+use std::sync::Arc;
 
 pub struct MessageRouterService {
     message_service: Arc<dyn MessageService>,
@@ -23,14 +22,14 @@ impl MessageRouterService {
     }
 
     /// 消息预处理和校验
-    pub async fn pre_process(&self, message: &Message) -> Result<i32> {
+    pub async fn pre_process(&self, message: &MessageData) -> Result<i32> {
         // 1. 基础格式校验
         let pre_process_code = self.message_service.pre_process(message).await?;
         Ok(pre_process_code as i32)
     }
 
     /// 消息路由处理
-    pub async fn route_message(&self, message: &Message) -> Result<(bool, Option<String>, Vec<String>)> {
+    pub async fn route_message(&self, message: &MessageData) -> Result<(bool, Option<String>, Vec<String>)> {
         // 1. 先存储消息
         if let Err(e) = self.message_service.handle_message_storage(message).await {
             error!("Failed to store message {}: {}", message.server_msg_id, e);
@@ -52,7 +51,7 @@ impl MessageRouterService {
     }
 
     /// 消息重试处理
-    pub async fn retry_message(&self, message: &Message) -> Result<()> {
+    pub async fn retry_message(&self, message: &MessageData) -> Result<()> {
         // 1. 检查是否需要重试
         if message.status == MessageStatus::Failed as i32 {
             self.message_service.handle_message_retry(message).await?;
@@ -62,7 +61,7 @@ impl MessageRouterService {
     }
 
     /// 批量消息处理
-    pub async fn process_messages(&self, messages: Vec<Message>) -> Result<HashMap<String, (bool, Option<String>, Vec<String>)>> {
+    pub async fn process_messages(&self, messages: Vec<MessageData>) -> Result<HashMap<String, (bool, Option<String>, Vec<String>)>> {
         let mut results = HashMap::new();
 
         for message in messages {

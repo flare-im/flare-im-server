@@ -67,7 +67,7 @@ enum AtType {
 // 会话类型
 enum SessionType {
     Single = 0;      // 单聊
-    Group = 1;       // 群聊
+    NormalGroup = 1;       // 普通群聊
     WorkGroup = 2;   // 工作群
     SuperGroup = 3;  // 超级群
     System = 4;      // 系统消息

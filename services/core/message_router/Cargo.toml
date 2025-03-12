@@ -26,6 +26,10 @@ thiserror.workspace = true
 tokio = { workspace = true, features = ["full"] }
 tonic.workspace = true
 uuid = { workspace = true, features = ["serde", "v4"] }
+rdkafka = { version = "0.37", features = ["cmake-build", "ssl", "sasl"] }
+prost.workspace = true
+tracing = { version = "0.1", features = ["attributes"] }
+opentelemetry = { version = "0.18", features = ["rt-tokio"] }
 
 [dev-dependencies]
 tokio-test.workspace = true

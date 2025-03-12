@@ -1,7 +1,6 @@
 use async_trait::async_trait;
 use anyhow::Result;
-use crate::entities::Message;
-
+use proto_crate::api::im::common::MessageData;
 /// 内容过滤结果
 #[derive(Debug, Clone)]
 pub struct FilterResult {
@@ -25,5 +24,5 @@ pub trait ContentFilterRepository: Send + Sync {
     /// 
     /// # 返回
     /// * `Result<FilterResult, Error>` - 过滤结果
-    async fn check(&self, message: &Message) -> Result<FilterResult>;
+    async fn check(&self, message: &MessageData) -> Result<FilterResult>;
 }

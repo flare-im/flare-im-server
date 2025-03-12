@@ -1,8 +1,9 @@
-use async_trait::async_trait;
-use crate::domain::entities::{Message, MessageStatus};
-use anyhow::Result;
+use crate::domain::entities::MessageStatus;
 use crate::domain::repositories::RouteInfo;
 use crate::entities::{DeviceStatus, UserStatus};
+use anyhow::Result;
+use async_trait::async_trait;
+use proto_crate::api::im::common::MessageData;
 
 /// 消息仓储接口
 #[async_trait]
@@ -14,20 +15,20 @@ pub trait MessageRepository: Send + Sync {
     /// 
     /// # 返回
     /// * `Result<(), Error>` - 保存成功返回Ok(()),失败返回具体错误
-    async fn save_message(&self, message: &Message) -> Result<()>;
+    async fn save_message(&self, message: &MessageData) -> Result<()>;
     /// 处理消息分发
     ///
     /// 包含:
     /// - 消息分发到各个网关
     /// - 消息分发到各个设备
-    async fn handle_message_distribution(&self, message: &Message) -> anyhow::Result<()>;
+    async fn handle_message_distribution(&self, message: &MessageData) -> Result<()>;
     /// 推送消息到网关
     ///
-    async fn push_message(&self, message: &Message,routers:Vec<RouteInfo>) -> Result<()>;
+    async fn push_message(&self, message: &MessageData,routers:Vec<RouteInfo>) -> Result<()>;
 
     /// 发送离线通知
     ///
-    async fn send_offline_notification(&self,userid :&str, message: &Message) -> Result<()>;
+    async fn send_offline_notification(&self,userid :&str, message: &MessageData) -> Result<()>;
 
     /// 更新消息状态
     /// 
@@ -86,43 +87,17 @@ pub trait MessageRepository: Send + Sync {
     /// * `Result<DeviceStatus, Error>` - 设备状态信息
     async fn get_device_status(&self, device_id: &str) -> Result<DeviceStatus>;
 
-    /// 获取消息详情
-    /// 
-    /// # 参数
-    /// * `message_id` - 消息ID
-    /// 
-    /// # 返回
-    /// * `Result<Option<Message>, Error>` - 消息详情，不存在返回None
-    async fn get_message(&self, message_id: &str) -> Result<Option<Message>>;
+    fn current_timestamp(&self) -> i64;
 
-    /// 批量获取消息
+    /// 保存消息到死信队列
     /// 
     /// # 参数
-    /// * `message_ids` - 消息ID列表
+    /// * `message` - 失败的消息
+    /// * `error` - 失败原因
+    /// * `retry_count` - 重试次数
     /// 
     /// # 返回
-    /// * `Result<Vec<Message>, Error>` - 消息列表
-    async fn get_messages(&self, message_ids: &[String]) -> Result<Vec<Message>>;
-
-    /// 获取会话最新消息
-    /// 
-    /// # 参数
-    /// * `session_id` - 会话ID
-    /// * `session_type` - 会话类型（单聊/群聊）
-    /// 
-    /// # 返回
-    /// * `Result<Option<Message>, Error>` - 最新消息，不存在返回None
-    async fn get_last_message(&self, session_id: &str, session_type: i32) -> Result<Option<Message>>;
-
-    /// 获取未读消息数量
-    /// 
-    /// # 参数
-    /// * `user_id` - 用户ID
-    /// * `session_id` - 会话ID
-    /// * `session_type` - 会话类型（单聊/群聊）
-    /// 
-    /// # 返回
-    /// * `Result<i32, Error>` - 未读消息数量
-    async fn get_unread_count(&self, user_id: &str, session_id: &str, session_type: i32) -> Result<i32>;
+    /// * `Result<(), Error>` - 保存成功返回Ok(()),失败返回具体错误
+    async fn save_to_dead_letter(&self, message: &MessageData, error: String, retry_count: i32) -> Result<()>;
 }
 

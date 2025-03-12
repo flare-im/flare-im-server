@@ -6,6 +6,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "proto/common/error.proto",
                 "proto/common/enums.proto",
                 "proto/common/message.proto",
+                "proto/common/server.proto",
                 "proto/gateway/message.proto",
                 "proto/gateway/api_gateway.proto",
                 "proto/service/store.proto",

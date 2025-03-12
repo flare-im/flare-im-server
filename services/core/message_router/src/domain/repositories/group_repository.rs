@@ -1,7 +1,7 @@
-use async_trait::async_trait;
-use crate::domain::entities::Message;
-use anyhow::Result;
 use crate::entities::{GroupStatus, MemberStatus};
+use anyhow::Result;
+use async_trait::async_trait;
+use proto_crate::api::im::common::MessageData;
 
 /// 群成员分页结果
 pub struct GroupMemberPage {
@@ -70,7 +70,7 @@ pub trait GroupRepository: Send + Sync {
     /// 
     /// # 返回
     /// * `Result<(), Error>` - 更新成功返回Ok(()),失败返回具体错误
-    async fn update_last_message(&self, group_id: &str, message: &Message) -> Result<()>;
+    async fn update_last_message(&self, group_id: &str, message: &MessageData) -> Result<()>;
 
     /// 增加群未读消息计数
     /// 
@@ -145,7 +145,7 @@ impl GroupRepository for MockGroupRepository {
         })
     }
 
-    async fn update_last_message(&self, _group_id: &str, _message: &Message) -> Result<()> {
+    async fn update_last_message(&self, _group_id: &str, _message: &MessageData) -> Result<()> {
         Ok(())
     }
 

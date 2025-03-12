@@ -10,7 +10,7 @@ license.workspace = true
 # 错误处理
 anyhow.workspace = true
 thiserror.workspace = true
-
+proto-crate = { path = "../proto-crate" }
 # 日志
 log.workspace = true
 tracing.workspace = true

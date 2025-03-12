@@ -11,7 +11,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
 use proto_crate::api::im::common::Error;
-use crate::entities::Message;
 
 pub struct MessageRouterGrpcService {
     message_router: Arc<MessageRouterService>,
@@ -35,13 +34,12 @@ impl MessageRouter for MessageRouterGrpcService {
         for filter_message in req.messages {
             let proto_msg = filter_message.message.as_ref()
                 .ok_or_else(|| Status::invalid_argument("message is required"))?;
-            let message = Message::from_proto(proto_msg);
             
-            let pre_process_code = self.message_router.pre_process(&message).await
+            let pre_process_code = self.message_router.pre_process(proto_msg).await
                 .map_err(|e| Status::internal(e.to_string()))?;
 
             results.push(FilterResult {
-                message_id: message.server_msg_id.clone(),
+                message_id: proto_msg.server_msg_id.clone(),
                 passed: pre_process_code == 0,
                 filter_results: HashMap::new(),
                 error: if pre_process_code != 0 {
@@ -72,13 +70,12 @@ impl MessageRouter for MessageRouterGrpcService {
         for upstream_message in req.messages {
             let proto_msg = upstream_message.message.as_ref()
                 .ok_or_else(|| Status::invalid_argument("message is required"))?;
-            let message = Message::from_proto(proto_msg);
             
-            let (success, error, routes) = self.message_router.route_message(&message).await
+            let (success, error, routes) = self.message_router.route_message(proto_msg).await
                 .map_err(|e| Status::internal(e.to_string()))?;
 
             results.push(RouteUpstreamResult {
-                message_id: message.server_msg_id.clone(),
+                message_id: proto_msg.server_msg_id.clone(),
                 success,
                 error: error.map(|e|Error {
                     code: 0,
@@ -102,10 +99,10 @@ impl MessageRouter for MessageRouterGrpcService {
         let mut messages = Vec::new();
 
         for distribute_message in req.messages {
-            let proto_msg = distribute_message.message.as_ref()
-                .ok_or_else(|| Status::invalid_argument("message is required"))?;
-            let message = Message::from_proto(proto_msg);
-            messages.push(message);
+            let proto_msg = distribute_message.message
+                .ok_or_else(|| Status::invalid_argument("message is required"))?
+                .clone();
+            messages.push(proto_msg);
         }
 
         let results_map = self.message_router.process_messages(messages).await
@@ -146,15 +143,14 @@ impl MessageRouter for MessageRouterGrpcService {
         for priority_message in req.messages {
             let proto_msg = priority_message.message.as_ref()
                 .ok_or_else(|| Status::invalid_argument("message is required"))?;
-            let message = Message::from_proto(proto_msg);
             
             // 默认优先级处理
-            let priority = message.options.get("priority")
+            let priority = proto_msg.options.get("priority")
                 .and_then(|v| v.parse::<i32>().ok())
                 .unwrap_or(0);
 
             results.push(PriorityResult {
-                message_id: message.server_msg_id.clone(),
+                message_id: proto_msg.server_msg_id.clone(),
                 priority,
                 error: None,
             });

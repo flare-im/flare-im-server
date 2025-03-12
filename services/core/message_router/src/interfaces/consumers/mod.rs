@@ -1,0 +1,3 @@
+mod message_distribution_consumer;
+
+pub use message_distribution_consumer::MessageDistributionConsumer; 

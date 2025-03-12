@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package api.im.common;
+
+option go_package = "github.com/flare/api/im/common;common";
+option java_multiple_files = true;
+option java_package = "api.im.common";
+
+import "common/message.proto";
+
+//消息负载
+message MessagePayload{
+    string msg_id = 1;
+    api.im.common.MessageData msg = 2;
+    int64 timestamp = 3;
+    map<string, string> metadata = 4;
+}
+
+//死信消息
+message DeadLetterMessage {
+    // 原始消息
+    MessagePayload original_message = 1;
+    
+    // 失败原因
+    string error_reason = 2;
+    
+    // 重试次数
+    int32 retry_count = 3;
+    
+    // 最大重试次数
+    int32 max_retry_count = 4;
+    
+    // 最后一次重试时间
+    int64 last_retry_time = 5;
+    
+    // 进入死信队列的时间
+    int64 dead_time = 6;
+    
+    // 额外的错误信息
+    map<string, string> error_metadata = 7;
+}

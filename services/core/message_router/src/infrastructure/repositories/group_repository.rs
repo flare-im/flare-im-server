@@ -2,9 +2,9 @@ use async_trait::async_trait;
 use anyhow::Result;
 use crate::domain::{
     repositories::{GroupRepository, GroupMemberQuery, GroupMemberPage},
-    entities::{Message, GroupStatus, MemberStatus},
+    entities::{GroupStatus, MemberStatus},
 };
-
+use proto_crate::api::im::common::MessageData;
 pub struct GroupRepositoryImpl;
 
 impl GroupRepositoryImpl {
@@ -60,7 +60,7 @@ impl GroupRepository for GroupRepositoryImpl {
         })
     }
 
-    async fn update_last_message(&self, _group_id: &str, _message: &Message) -> Result<()> {
+    async fn update_last_message(&self, _group_id: &str, _message: &MessageData) -> Result<()> {
         Ok(())
     }
 
